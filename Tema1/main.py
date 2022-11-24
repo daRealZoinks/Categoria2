@@ -1,10 +1,9 @@
-from Grammar import Grammar
+from DeterministicFiniteAutomaton import DeterministicFiniteAutomaton
 
 
 def main():
-    g = Grammar()
-    print("Tema 1")
-    g.print()
+    dfa = DeterministicFiniteAutomaton()
+    dfa.print_automaton()
 
 
 if __name__ == '__main__':

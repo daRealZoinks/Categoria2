@@ -1,6 +1,7 @@
 import re
 from regex_to_finite_automaton import regex_to_finite_automaton as R2FA
-from DeterministicFiniteAutomaton import DeterministicFiniteAutomaton as DFA
+
+
 def main():
 
     file = open("DepresieRegulata.txt", 'r')
@@ -29,7 +30,7 @@ def main():
 
         option = input("Enter option: ")
 
-        if Tries == 10 :
+        if Tries == 10:
             print("TOO MANY TRIES!!! 🤬🤬🤬")
             return
         if option == '1':
@@ -50,11 +51,11 @@ def main():
             pass
         elif option == '4':
             Tries = 1
-            print("Nu suntem inteligenti si muncitori?? 😎")
+            print("Nu-i asa doamna ca suntem inteligenti si muncitori?? 😎")
             return
         else:
             print("Option not valid! 😡")
-            Tries+=1
+            Tries += 1
 
 
 if __name__ == '__main__':

@@ -8,25 +8,25 @@ class DeterministicFiniteAutomaton:
 
     def verify_automaton(self):
         if len(self.Q) == 0:
-            print("ERROR: Q e gol")
+            print("ERROR: Q is empty")
             return False
 
         if len(self.sigma) == 0:
-            print("ERROR: sigma e gol")
+            print("ERROR: sigma is empty")
             return False
 
         if self.q0 not in self.Q:
-            print("ERROR: q0 nu exista in Q")
+            print("ERROR: q0 does not exist in Q")
             return False
 
         for state in self.F:
             if state not in self.Q:
-                print("ERROR: F nu e inclus in Q")
+                print("ERROR: F is not in Q")
                 return False
 
         for transition in self.delta:
             if transition[0] not in self.Q or transition[1] not in self.sigma or transition[2] not in self.Q:
-                print("ERROR: delta nu e o functie din Q x sigma spre Q")
+                print("ERROR: delta is not a function from Q x sigma to Q")
                 return False
 
         return True
@@ -42,7 +42,7 @@ class DeterministicFiniteAutomaton:
 
     def check_word(self, word):
         if not self.verify_automaton():
-            print("ERROR: Automatul nu e valid")
+            print("ERROR: Automaton is not valid")
             return False
 
         states = list(self.q0)
@@ -68,3 +68,15 @@ class DeterministicFiniteAutomaton:
                         transition[2] != transition2[2]:
                     return False
         return True
+
+    def __add__(self, other):
+        # TODO : Adunare AFD
+        pass
+
+    def __mul__(self, other):
+        # TODO : Inmultire AFD
+        pass
+
+    def __pow__(self, power, modulo=None):
+        # TODO : Ridicare la putere AFD
+        pass

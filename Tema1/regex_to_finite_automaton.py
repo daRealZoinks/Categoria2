@@ -1,122 +1,74 @@
-import re
 from DeterministicFiniteAutomaton import DeterministicFiniteAutomaton as DFA
 
 
 def regex_to_finite_automaton(r: str) -> DFA:
-	automat: DFA
 	automat = DFA()
 
 	# TODO : Obtinerea unui automat Mλ cu λ tranzitii corespunzator expresiei regulate
 
-	# Obtinerea automatului Mλ: Pentru rezolvarea primei etape:
-
-	# Se poate obtine relativ usor o forma poloneza postfixata pentru o expresie
-	# aritmetica, in mod similar cu algoritmul prezentat la SD, la
-	# capitolul "Stive si cozi". Se poate considera operatia de sau (|) echivalenta cu
-	# operatia +, operatia de concatenare (.) echivalenta cu operatia de inmultire
-	# aritmetica si operatia de stelare (*) similara cu ridicarea la putere, doar ca
-	# spre deosebire de ridicarea la putere este o operatie unara.
-
-	# exemplu
-	# a.b.a.(a.a|b.b)*.c.(a.b)*
-
-	# forma poloneza
-	# ab.a.aa.bb.|*.c.ab.*.
-
-	# Din forma poloneza obtinuta se poate obtine automatul cu λ tranzitii in mod
-	# similar cu evaluarea unei expresii aritmetice pe baza formei poloneze postfixate,
-	# in modul urmator, folosind o stiva de automate SA si un contor pentru
-	# numarul de stari, contor, initial egal cu 0:
-
-	# 1. se parcurge forma polonez element cu element cu un indice index
-
-	# 2. daca fp[index] este un caracter "a" atunci se construieste automatul corespunzator.
-	# Acest automat se pune pe stiva SA, se creste contorul cu 2.
-
-	# 3. daca fp[index] este operatorul | (sau) atunci:
-	# - se extrag din vârful stivei 2 automate B = SA.top(), SA.pop(),
-	# A = SA.top(), SA.pop()
-
-	# - cele doua automate se leaga ca în figura si se obtine un nou automat
-	# C, care se pune pe stiva SA.
-	# A
-	# λ   # ---------------------- #   λ #
-	# ----> #  # iA           # fA   # <---- #
-	# |     # ---------------------- #     | #
-	# |                                    | #
-	# qcontor                                # qcontor+1
-	# |                                    | #
-	# |     # ---------------------- #     | #
-	# ----> #  # iB           # fB   # <---- #
-	# λ   # ---------------------- #   λ #
-	# B
-
-	# Acest lucru presupune ca starile initiale (iA, iB) si finale ale A si B
-	# (fA, fB) isi pierd aceste calitati, devenind stari obisnuite. In plus
-	# apare o noua stare initiala qcontor si o noua stare finala qcontor+1,
-	# precum si 4 λ-tranzitii: de la noua stare initiala la fostele stari initiale
-	# ale automatelor A si B, si de la fostele stari finale ale automatelor A
-	# si B catre noua stare finala. Din nou creste contorul cu 2.
-
-	# - automatul C se pune pe stiva SA
-
-	# 4. daca fp[index] este operatorul . (concatenare) atunci:
-	# - se extrag din varful stivei 2 automate B = SA.top(), SA.pop(),
-	# A = SA.top(), SA.pop()
-
-	# - cele 2 automate se leaga ca in figura si se obtine un nou automat
-	# C, care se pune pe stiva SA.
-
-	# iA | fA = fB | iB
-
-	# Acest lucru presupune ca starea initiala a lui A (iA) va fi starea
-	# initiala a lui C, starea finala a lui B (fB) va fi starea finala a lui
-	# C, starea finala a lui A (fA) isi pierde calitatea de finala si starea
-	# initiala lui B (iB) isi pierde calitatea de initiala, iar cele 2 stari
-	# se contopesc. Aici trebuie avut grija la toate tranzitiile pe care le au
-	# cele 2 stari.
-
-	# - automatul C se pune pe stiva SA
-
-	# 5. daca fp[index] este operatorul * (inchiderea kleene - "stelare") atunci:
-	# - se extrage din varful stivei automatul A = SA.top(), SA.pop()
-
-	# - se adauga o noua stare initiala qcontor, iar starea initiala veche (iA)
-	# isi pierde calitatea de initiala, se adauga o noua stare finala qcontor+1,
-	# iar vechea stare finala (fA) isi pierde calitatea de finala. Se adauga
-	# 4 λ-tranzitii noi: de la noua stare initiala la vechea stare initiala, de
-	# la vechea stare finala la noua stare finala, de la noua stare initiala la
-	# noua stare finala si de la vechea stare finala la vechea stare initiala
-	# (vezi figura). Contorul creste cu 2.
-
-	# -------------------------------------------- #
-	# |                                          | #
-	# v     # λ                        # λ       v #
-	# qcontor ------>  iA     A    fA  ------>  qcontor+1 #
-	# ^            ^ #
-	# |            | #
-	# -------------- #
-
-	# - automatul C se pune pe stiva SA
-
-	# Dupa ce s-a parcurs toata forma poloneza, pe stiva trebuie sa fie un singur
-	# automat = automatul final
-
-	# Observaµie: Trebuie definite functii, care din 2 automate (respectiv unul la
-	# operatia *) cu un operator construiesc un al treilea automat.
-
 	fp = forma_poloneza(r)
 
+	SA = []
+	contor = 0
 
 	A = DFA()
 	B = DFA()
 	C = DFA()
-	SA = []
-	contor = 0
+
+	for char in fp:
+		if 'a' <= char <= 'c':
+			C = DFA()
+			C.Q.add("q" + str(contor))
+			C.Q.add("q" + str(contor + 1))
+			C.sigma.add(char)
+			C.delta.add(("q" + str(contor), char, "q" + str(contor + 1)))
+			C.q0 = "q" + str(contor)
+			C.F.add("q" + str(contor + 1))
+			SA.append(C)
+			contor += 2
+		elif char == '|':
+			B = SA.pop()
+			A = SA.pop()
+			C = DFA()
+
+			C.Q.add("q" + str(contor))
+			C.q0 = "q" + str(contor)
+			C.Q.add("q" + str(contor + 1))
+			C.F.add("q" + str(contor + 1))
+
+			C.sigma.add("λ")
+
+			C.delta.add(("q" + str(contor), "λ", A.q0))
+			C.delta.add(("q" + str(contor), "λ", B.q0))
+			C.delta.add((A.F.pop(), "λ", "q" + str(contor + 1)))
+			C.delta.add((B.F.pop(), "λ", "q" + str(contor + 1)))
+
+			contor += 2
+			SA.append(C)
+		elif char == '.':
+			B = SA.pop()
+			A = SA.pop()
+
+			C = DFA()
+
+			C.q0 = A.q0
+			C.F.add(B.F.pop())
+
+			C.Q = C.q0 | C.F
+			C.sigma = A.sigma | B.sigma
+
+			SA.append(C)
+		elif char == '*':
+			A = SA.pop()
+			C = A**2
+			contor += 2
+			SA.append(C)
+	if len(SA) == 1:
+		return SA.pop()
 
 	# TODO : Obtinerea unui automat finit determinist M echivalent cu Mλ obtinut la punctul anterior
 
-	return DFA()
+	return SA[-1]
 
 
 def prec(c):
@@ -148,7 +100,6 @@ def forma_poloneza(sir):
 		elif E == ')':
 			while OP[-1] != '(':
 				FP.append(OP.pop())
-			OP.pop()
 			if len(OP) == 0:
 				print("Parantezare incorecta")
 				FP = []

@@ -68,3 +68,94 @@ class DeterministicFiniteAutomaton:
 						transition[2] != transition2[2]:
 					return False
 		return True
+
+	def __add__(self, other):
+		nfa = {}
+
+		nfa["states"] = []
+		nfa["states"].extend(self["states"])
+		nfa["states"].extend(other["states"])
+
+		nfa["initial_state"] = self["initial_state"]
+		nfa["final_states"] = other["final_states"]
+		nfa["alphabets"] = list(set(self["alphabets"]) | set(other["alphabets"]))
+
+		nfa["transition_function"] = {}
+		for state in nfa["states"]:
+			if state in self["states"]:
+				nfa["transition_function"][state] = self["transition_function"][state]
+			elif state in other["states"]:
+				nfa["transition_function"][state] = other["transition_function"][state]
+
+		# connect final states of nfa1 with start state of other using epsilon transition
+		for state in self["final_states"]:
+			nfa["transition_function"][state][Consts.EPSILON].append(
+				other["initial_state"])
+
+		return nfa
+
+	def __mul__(self, other):
+		nfa = {}
+
+		nfa["states"] = [uuid.uuid4()]
+		nfa["states"].extend(self["states"])
+		nfa["states"].extend(other["states"])
+
+		nfa["initial_state"] = nfa["states"][0]
+		nfa["final_states"] = []
+		nfa["final_states"].extend(self["final_states"])
+		nfa["final_states"].extend(other["final_states"])
+		nfa["alphabets"] = list(set(self["alphabets"]) | set(other["alphabets"]))
+
+		nfa["transition_function"] = {}
+		for state in nfa["states"]:
+			if state in self["states"]:
+				nfa["transition_function"][state] = self["transition_function"][state]
+			elif state in other["states"]:
+				nfa["transition_function"][state] = other["transition_function"][state]
+			else:
+				nfa["transition_function"][state] = {}
+				for alphabet in nfa["alphabets"]:
+					nfa["transition_function"][state][alphabet] = []
+
+		# connecting start state to start state of nfa 1 and nfa 2 through epsilon move
+		nfa["transition_function"][nfa["initial_state"]][Consts.EPSILON].extend(
+			[self["initial_state"], other["initial_state"]])
+		return nfa
+
+	def __pow__(self, power, modulo=None):
+		nfa = {}
+
+		nfa["states"] = [uuid.uuid4()]
+		nfa["states"].extend(self["states"])
+		nfa["states"].append(uuid.uuid4())
+
+		nfa["initial_state"] = nfa["states"][0]
+		nfa["final_states"] = [nfa["states"][len(nfa["states"])-1]]
+		nfa["alphabets"] = self["alphabets"]
+
+		nfa["transition_function"] = {}
+		for state in nfa["states"]:
+			if state in self["states"]:
+				nfa["transition_function"][state] = self["transition_function"][state]
+			else:
+				nfa["transition_function"][state] = {}
+				for alphabet in nfa["alphabets"]:
+					nfa["transition_function"][state][alphabet] = []
+
+		# connecting start state to start state of nfa 1 through epsilon move
+		nfa["transition_function"][nfa["initial_state"]
+								   ][Consts.EPSILON].append(self["initial_state"])
+
+		for final_state in self["final_states"]:
+			# connecting final states of nfa1 to start state of nfa1 through epsilon move
+			nfa["transition_function"][final_state][Consts.EPSILON].append(
+				self["initial_state"])
+			# connecting final states of nfa1 to final states of nfa through epsilon move
+			nfa["transition_function"][final_state][Consts.EPSILON].extend(
+				nfa["final_states"])
+
+		# connecting start state to final state of nfa through epsilon move
+		nfa["transition_function"][nfa["initial_state"]
+								   ][Consts.EPSILON].extend(nfa["final_states"])
+		return nfa

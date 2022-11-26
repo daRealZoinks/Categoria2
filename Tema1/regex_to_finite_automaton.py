@@ -1,4 +1,4 @@
-from DeterministicFiniteAutomaton import DeterministicFiniteAutomaton as DFA
+from deterministic_finite_automaton import DeterministicFiniteAutomaton as Dfa
 
 
 def regex_to_finite_automaton(r):
@@ -11,23 +11,23 @@ def regex_to_finite_automaton(r):
 
 	for char in fp:
 		if 'a' <= char <= 'c':
-			C = DFA()
-			C.Q.add("q" + str(contor))
-			C.Q.add("q" + str(contor + 1))
+			C = Dfa()
+			C.Q.add(contor)
+			C.Q.add(contor + 1)
 			C.sigma.add(char)
-			C.delta.add(("q" + str(contor), char, "q" + str(contor + 1)))
-			C.q0 = "q" + str(contor)
-			C.F.add("q" + str(contor + 1))
+			C.delta.add((contor, char, contor + 1))
+			C.q0 = contor
+			C.F.add(contor + 1)
 			SA.append(C)
 			contor += 2
 		elif char == '|':
 			B = SA.pop()
 			A = SA.pop()
-			C = DFA()
-			C.Q.add("q" + str(contor))
-			C.q0 = "q" + str(contor)
-			C.Q.add("q" + str(contor + 1))
-			C.F.add("q" + str(contor + 1))
+			C = Dfa()
+			C.q0 = contor
+			C.Q.add(C.q0)
+			C.F.add(contor + 1)
+			C.Q.add(list(C.F)[-1])
 			C.sigma.add("λ")
 			C.delta.add((C.q0, "λ", A.q0))
 			C.delta.add((C.q0, "λ", B.q0))
@@ -38,30 +38,47 @@ def regex_to_finite_automaton(r):
 		elif char == '.':
 			B = SA.pop()
 			A = SA.pop()
-			A.F = set(B.q0)
-			C = DFA()
+			for transition in A.delta:
+				if transition[2] == list(A.F)[-1]:
+					new_transition = (transition[0], transition[1], B.q0)
+					A.delta.remove(transition)
+					A.delta.add(new_transition)
+			for automaton in SA:
+				for transition in automaton.delta:
+					if transition[0] == list(A.F)[-1]:
+						new_transition = (B.q0, transition[1], transition[2])
+						automaton.delta.remove(transition)
+						automaton.delta.add(new_transition)
+					if transition[2] == list(A.F)[-1]:
+						new_transition = (transition[0], transition[1], B.q0)
+						automaton.delta.remove(transition)
+						automaton.delta.add(new_transition)
+			A.Q.remove(list(A.F)[-1])
+			A.F = {B.q0}
+			A.Q.add(list(A.F)[-1])
+
+			C = Dfa()
 			C.q0 = A.q0
 			C.F.add(list(B.F)[-1])
-			C.Q.update(A.Q)
-			C.Q.update(B.Q)
+			C.Q = A.Q | B.Q
 			C.sigma = A.sigma | B.sigma
 			C.delta = A.delta | B.delta
 			SA.append(C)
 		elif char == '*':
 			A = SA.pop()
-			C = DFA()
-			C.q0 = "q" + str(contor)
+			C = Dfa()
+			C.q0 = contor
 			C.Q.add(C.q0)
-			C.F.add("q" + str(contor + 1))
+			C.F.add(contor + 1)
 			C.Q.add(list(C.F)[-1])
-			C.sigma.add("λ")
+			C.Q.update(A.Q)
+			C.sigma = A.sigma | {"λ"}
 			C.delta.add((C.q0, "λ", A.q0))
 			C.delta.add((list(A.F)[-1], "λ", list(C.F)[-1]))
 			C.delta.add((C.q0, "λ", list(C.F)[-1]))
 			C.delta.add((list(A.F)[-1], "λ", A.q0))
 			contor += 2
 			SA.append(C)
-
 	if len(SA) == 1:
 		SA.pop().print_automaton()
 

@@ -7,10 +7,10 @@ dpg.create_context()
 
 
 def button_pressed():
-    r = random.randint(0, 255)
-    g = random.randint(0, 255)
-    b = random.randint(0, 255)
-    dpg.set_viewport_clear_color([r, g, b, 255])
+	r = random.randint(0, 255)
+	g = random.randint(0, 255)
+	b = random.randint(0, 255)
+	dpg.set_viewport_clear_color([r, g, b, 255])
 
 
 dpg.create_viewport(title="Tema3", width=1270, height=720)
@@ -26,16 +26,16 @@ demo.show_demo()
 
 
 with dpg.window(label="Ni ba", width=500, height=200, pos=(100, 100)):
-    dpg.add_text("O waw")
-    dpg.add_button(label="Uite un buton", callback=button_pressed)
-    dpg.add_input_text(label="aci putem scrie")
-    dpg.add_slider_float(label="de asta putem trage")
+	dpg.add_text("O waw")
+	dpg.add_button(label="Uite un buton", callback=button_pressed)
+	dpg.add_input_text(label="aci putem scrie")
+	dpg.add_slider_float(label="de asta putem trage")
 
 with dpg.window(label="Fereastra", width=500, height=150, pos=(100, 100)):
-    dpg.add_button(label="Uite alt buton", callback=button_pressed)
-    dpg.add_text("Nuj dc am atatea butoane si ferestre")
-    dpg.add_input_text(label="aci putem scrie si mai mult")
-    dpg.add_slider_float(label="de asta putem trage si mai mult", max_value=100, default_value=50)
+	dpg.add_button(label="Uite alt buton", callback=button_pressed)
+	dpg.add_text("Nuj dc am atatea butoane si ferestre")
+	dpg.add_input_text(label="aci putem scrie si mai mult")
+	dpg.add_slider_float(label="de asta putem trage si mai mult", max_value=100, default_value=50)
 
 
 dpg.show_viewport()

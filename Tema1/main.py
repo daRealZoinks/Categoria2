@@ -1,5 +1,5 @@
 import re
-from regex_to_finite_automaton import regex_to_finite_automaton as R2FA
+from regex_to_finite_automaton import regex_to_finite_automaton as r2fa
 
 
 def main():
@@ -14,7 +14,7 @@ def main():
         print("Non valid regex pattern 🤡")
         exit()
 
-    M = R2FA(r)
+    M = r2fa(r)
 
     if not M.is_deterministic():
         print("M is not deterministic 🤓")

@@ -2,57 +2,57 @@ from deterministic_finite_automaton import DeterministicFiniteAutomaton as Dfa
 
 
 def regex_to_finite_automaton(r):
-	# TODO : Obtinerea unui automat Mλ cu λ tranzitii corespunzator expresiei regulate
-
 	fp = forma_poloneza(r)
 
 	SA = []
 	contor = 0
 
 	for char in fp:
-		if 'a' <= char <= 'c':
+		if 'a' <= char <= 'z':
 			C = Dfa()
-			C.Q.add(contor)
-			C.Q.add(contor + 1)
+
+			C.q0 = "q" + str(contor)
+			C.F.add("q" + str(contor+ 1))
+			C.Q.add(C.q0)
+			C.Q.add(list(C.F)[-1])
 			C.sigma.add(char)
-			C.delta.add((contor, char, contor + 1))
-			C.q0 = contor
-			C.F.add(contor + 1)
-			SA.append(C)
+			C.delta.add((C.q0, char, list(C.F)[-1]))
+
 			contor += 2
+			SA.append(C)
+
 		elif char == '|':
 			B = SA.pop()
 			A = SA.pop()
 			C = Dfa()
-			C.q0 = contor
+
+			C.q0 = "q" + str(contor)
+			C.Q = A.Q | B.Q
 			C.Q.add(C.q0)
-			C.F.add(contor + 1)
+			C.F.add("q" + str(contor + 1))
 			C.Q.add(list(C.F)[-1])
+			C.Q.update({A.q0, B.q0, list(A.F)[-1], list(B.F)[-1]})
+			C.sigma = A.sigma | B.sigma
 			C.sigma.add("λ")
+			C.delta = A.delta | B.delta
 			C.delta.add((C.q0, "λ", A.q0))
 			C.delta.add((C.q0, "λ", B.q0))
 			C.delta.add((list(A.F)[-1], "λ", list(C.F)[-1]))
 			C.delta.add((list(B.F)[-1], "λ", list(C.F)[-1]))
+
 			contor += 2
 			SA.append(C)
+
 		elif char == '.':
 			B = SA.pop()
 			A = SA.pop()
+
 			for transition in A.delta:
 				if transition[2] == list(A.F)[-1]:
 					new_transition = (transition[0], transition[1], B.q0)
 					A.delta.remove(transition)
 					A.delta.add(new_transition)
-			for automaton in SA:
-				for transition in automaton.delta:
-					if transition[0] == list(A.F)[-1]:
-						new_transition = (B.q0, transition[1], transition[2])
-						automaton.delta.remove(transition)
-						automaton.delta.add(new_transition)
-					if transition[2] == list(A.F)[-1]:
-						new_transition = (transition[0], transition[1], B.q0)
-						automaton.delta.remove(transition)
-						automaton.delta.add(new_transition)
+
 			A.Q.remove(list(A.F)[-1])
 			A.F = {B.q0}
 			A.Q.add(list(A.F)[-1])
@@ -63,24 +63,33 @@ def regex_to_finite_automaton(r):
 			C.Q = A.Q | B.Q
 			C.sigma = A.sigma | B.sigma
 			C.delta = A.delta | B.delta
+
 			SA.append(C)
+
 		elif char == '*':
 			A = SA.pop()
 			C = Dfa()
-			C.q0 = contor
+
+			C.q0 = "q" + str(contor)
+			C.Q = A.Q
 			C.Q.add(C.q0)
-			C.F.add(contor + 1)
+			C.F.add("q" + str(contor + 1))
 			C.Q.add(list(C.F)[-1])
-			C.Q.update(A.Q)
+			C.Q.update({A.q0, list(A.F)[-1]})
 			C.sigma = A.sigma | {"λ"}
+			C.delta = A.delta
 			C.delta.add((C.q0, "λ", A.q0))
 			C.delta.add((list(A.F)[-1], "λ", list(C.F)[-1]))
 			C.delta.add((C.q0, "λ", list(C.F)[-1]))
 			C.delta.add((list(A.F)[-1], "λ", A.q0))
+
 			contor += 2
 			SA.append(C)
+
 	if len(SA) == 1:
 		SA.pop().print_automaton()
+	else:
+		print("OROARE")
 
 	# TODO : Obtinerea unui automat finit determinist M echivalent cu Mλ obtinut la punctul anterior
 

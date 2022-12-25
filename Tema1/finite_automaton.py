@@ -1,4 +1,4 @@
-class DeterministicFiniteAutomaton:
+class FiniteAutomaton:
 	def __init__(self):
 		self.Q = set()
 		self.sigma = set()

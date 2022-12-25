@@ -1,5 +1,4 @@
-from deterministic_finite_automaton import DeterministicFiniteAutomaton as Dfa
-
+from finite_automaton import FiniteAutomaton as Fa
 
 def regex_to_finite_automaton(r):
 	fp = forma_poloneza(r)
@@ -9,7 +8,7 @@ def regex_to_finite_automaton(r):
 
 	for char in fp:
 		if 'a' <= char <= 'z':
-			C = Dfa()
+			C = Fa()
 
 			C.q0 = "q" + str(contor)
 			C.F.add("q" + str(contor+ 1))
@@ -24,7 +23,7 @@ def regex_to_finite_automaton(r):
 		elif char == '|':
 			B = SA.pop()
 			A = SA.pop()
-			C = Dfa()
+			C = Fa()
 
 			C.q0 = "q" + str(contor)
 			C.Q = A.Q | B.Q
@@ -57,7 +56,7 @@ def regex_to_finite_automaton(r):
 			A.F = {B.q0}
 			A.Q.add(list(A.F)[-1])
 
-			C = Dfa()
+			C = Fa()
 			C.q0 = A.q0
 			C.F.add(list(B.F)[-1])
 			C.Q = A.Q | B.Q
@@ -68,7 +67,7 @@ def regex_to_finite_automaton(r):
 
 		elif char == '*':
 			A = SA.pop()
-			C = Dfa()
+			C = Fa()
 
 			C.q0 = "q" + str(contor)
 			C.Q = A.Q
@@ -86,12 +85,97 @@ def regex_to_finite_automaton(r):
 			contor += 2
 			SA.append(C)
 
-	if len(SA) == 1:
-		SA.pop().print_automaton()
-	else:
-		print("OROARE")
+	if len(SA) != 1:
+		print("EROARE")
+		exit(1)
 
-	# TODO : Obtinerea unui automat finit determinist M echivalent cu Mλ obtinut la punctul anterior
+	result = SA.pop()
+
+	elemente = dict()
+	elemente["q'0"] = lambda_inchidere(result, [result.q0])
+
+	contor_elemente_din_dictionar = 0
+
+	while elemente["q'" + str(contor_elemente_din_dictionar)].intersection(result.F) == set():
+		for litera in result.sigma - {"λ"}:
+			delta_prim_element = delta_prim(elemente["q'" + str(contor_elemente_din_dictionar)], result, litera)
+			if delta_prim_element not in elemente.values():
+				contor_elemente_din_dictionar += 1
+				elemente["q'" + str(contor_elemente_din_dictionar)] = lambda_inchidere(result, delta_prim_element)
+
+	print(elemente)
+
+	# show me all the deltas from the elemente
+
+
+
+	new_automaton = Fa()
+	new_automaton.q0 = "q'0"
+	new_automaton.Q = set(elemente.keys())
+	new_automaton.F = list(elemente.keys())[-1]
+	new_automaton.sigma = result.sigma
+
+	for key in elemente.keys():
+		for litera in result.sigma - {"λ"}:
+			delta_prim_element = delta_prim(elemente[key], result, litera)
+			print(key, litera, delta_prim_element)
+
+	new_automaton.print_automaton()
+
+
+
+
+
+
+
+
+
+
+
+
+
+	# elemente["q'1"] = lambda_inchidere(result, delta_prim(elemente["q'0"], result, "a"))
+	# elemente["q'2"] = lambda_inchidere(result, delta_prim(elemente["q'0"], result, "b"))
+	# elemente["q'3"] = lambda_inchidere(result, delta_prim(elemente["q'1"], result, "a"))
+	# elemente["q'4"] = lambda_inchidere(result, delta_prim(elemente["q'2"], result, "b"))
+	#
+	# print(elemente["q'0"], "= q'0")
+	# print("delta(q'0, a) = ", delta_prim(elemente["q'0"], result, "a"))
+	# print(elemente["q'1"], "= q'1")
+	# print("delta(q'0, b) = ", delta_prim(elemente["q'0"], result, "b"))
+	# print(elemente["q'2"], "= q'2")
+	# print("delta(q'1, a) = ", delta_prim(elemente["q'1"], result, "a"))
+	# print(elemente["q'3"], "= q'3")
+	# print("delta(q'1, b) = ", delta_prim(elemente["q'1"], result, "b"))
+	# print("delta(q'2, a) = ", delta_prim(elemente["q'2"], result, "a"))
+	# print("delta(q'2, b) = ", delta_prim(elemente["q'2"], result, "b"))
+	# print(elemente["q'4"], "= q'4")
+	# print("delta(q'3, a) = ", delta_prim(elemente["q'3"], result, "a"))
+	# print("delta(q'3, b) = ", delta_prim(elemente["q'3"], result, "b"))
+	# print("delta(q'4, a) = ", delta_prim(elemente["q'4"], result, "a"))
+	# print("delta(q'4, b) = ", delta_prim(elemente["q'4"], result, "b"))
+
+
+def lambda_inchidere(automat, stari):
+	stari_lambda = set(stari)
+
+	yes = True
+	while yes:
+		yes = False
+		for tranzitie in automat.delta:
+			if tranzitie[0] in stari_lambda and tranzitie[1] == "λ":
+				if tranzitie[2] not in stari_lambda:
+					stari_lambda.add(tranzitie[2])
+					yes = True
+	return set(sorted(stari_lambda))
+
+
+def delta_prim(lambda_inchidere_set, automat, litera):
+	delta_prim_set = set()
+	for tranzitie in automat.delta:
+		if tranzitie[0] in lambda_inchidere_set and tranzitie[1] == litera:
+			delta_prim_set.add(tranzitie[2])
+	return set(sorted(delta_prim_set))
 
 
 def prec(c):

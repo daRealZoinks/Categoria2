@@ -94,66 +94,61 @@ def regex_to_finite_automaton(r):
 	elemente = dict()
 	elemente["q'0"] = lambda_inchidere(result, [result.q0])
 
-	contor_elemente_din_dictionar = 0
+	# print("delta'(q'0, a) = ", delta_prim(elemente["q'0"], result, "a"))
+	# elemente["q'1"] = lambda_inchidere(result, delta_prim(elemente["q'0"], result, "a"))
+	# print("delta'(q'0, b) = ", delta_prim(elemente["q'0"], result, "b"))
+	# elemente["q'2"] = lambda_inchidere(result, delta_prim(elemente["q'0"], result, "b"))
+	# print("delta'(q'1, a) = ", delta_prim(elemente["q'1"], result, "a"))
+	# elemente["q'3"] = lambda_inchidere(result, delta_prim(elemente["q'1"], result, "a"))
+	# print("delta'(q'1, b) = ", delta_prim(elemente["q'1"], result, "b"))
+	# print("delta'(q'2, a) = ", delta_prim(elemente["q'2"], result, "a"))
+	# print("delta'(q'2, b) = ", delta_prim(elemente["q'2"], result, "b"))
+	# elemente["q'4"] = lambda_inchidere(result, delta_prim(elemente["q'2"], result, "b"))
+	# print("delta'(q'3, a) = ", delta_prim(elemente["q'3"], result, "a"))
+	# print("delta'(q'3, b) = ", delta_prim(elemente["q'3"], result, "b"))
+	# print("delta'(q'4, a) = ", delta_prim(elemente["q'4"], result, "a"))
+	# print("delta'(q'4, b) = ", delta_prim(elemente["q'4"], result, "b"))
 
-	while elemente["q'" + str(contor_elemente_din_dictionar)].intersection(result.F) == set():
-		for litera in result.sigma - {"λ"}:
-			delta_prim_element = delta_prim(elemente["q'" + str(contor_elemente_din_dictionar)], result, litera)
-			if delta_prim_element not in elemente.values():
-				contor_elemente_din_dictionar += 1
-				elemente["q'" + str(contor_elemente_din_dictionar)] = lambda_inchidere(result, delta_prim_element)
+	# automate whats above
 
+	counter = 1
+
+	i = 0
+	gata = False
+
+	while True:
+		for char in sorted(result.sigma - {"λ"}):
+			delta = delta_prim(elemente["q'" + str(i)], result, char)
+			print("delta'(q'" , str(i) , ", " , char , ") = ", delta)
+			if delta != set() and lambda_inchidere(result, delta) not in elemente.values():
+				if "q'" + str(counter) not in elemente.keys():
+					elemente["q'" + str(counter)] = lambda_inchidere(result, delta)
+					if result.F.intersection(elemente["q'" + str(counter)]) != set():
+						gata = True
+					print("q'" , str(counter) , " = ", elemente["q'" + str(counter)])
+					if not gata:
+						counter += 1
+		if i == counter and gata:
+			break
+		i += 1
+
+	print()
 	print(elemente)
-
-	# show me all the deltas from the elemente
-
-
 
 	new_automaton = Fa()
 	new_automaton.q0 = "q'0"
 	new_automaton.Q = set(elemente.keys())
-	new_automaton.F = list(elemente.keys())[-1]
+	new_automaton.F = {list(elemente.keys())[-1]}
 	new_automaton.sigma = result.sigma
 
 	for key in elemente.keys():
 		for litera in result.sigma - {"λ"}:
-			delta_prim_element = delta_prim(elemente[key], result, litera)
-			print(key, litera, delta_prim_element)
+			delta = delta_prim(elemente[key], result, litera)
+			for key2 in elemente.keys():
+				if elemente[key2] == lambda_inchidere(result, delta):
+					new_automaton.delta.add((key, litera, key2))
 
-	new_automaton.print_automaton()
-
-
-
-
-
-
-
-
-
-
-
-
-
-	# elemente["q'1"] = lambda_inchidere(result, delta_prim(elemente["q'0"], result, "a"))
-	# elemente["q'2"] = lambda_inchidere(result, delta_prim(elemente["q'0"], result, "b"))
-	# elemente["q'3"] = lambda_inchidere(result, delta_prim(elemente["q'1"], result, "a"))
-	# elemente["q'4"] = lambda_inchidere(result, delta_prim(elemente["q'2"], result, "b"))
-	#
-	# print(elemente["q'0"], "= q'0")
-	# print("delta(q'0, a) = ", delta_prim(elemente["q'0"], result, "a"))
-	# print(elemente["q'1"], "= q'1")
-	# print("delta(q'0, b) = ", delta_prim(elemente["q'0"], result, "b"))
-	# print(elemente["q'2"], "= q'2")
-	# print("delta(q'1, a) = ", delta_prim(elemente["q'1"], result, "a"))
-	# print(elemente["q'3"], "= q'3")
-	# print("delta(q'1, b) = ", delta_prim(elemente["q'1"], result, "b"))
-	# print("delta(q'2, a) = ", delta_prim(elemente["q'2"], result, "a"))
-	# print("delta(q'2, b) = ", delta_prim(elemente["q'2"], result, "b"))
-	# print(elemente["q'4"], "= q'4")
-	# print("delta(q'3, a) = ", delta_prim(elemente["q'3"], result, "a"))
-	# print("delta(q'3, b) = ", delta_prim(elemente["q'3"], result, "b"))
-	# print("delta(q'4, a) = ", delta_prim(elemente["q'4"], result, "a"))
-	# print("delta(q'4, b) = ", delta_prim(elemente["q'4"], result, "b"))
+	return new_automaton
 
 
 def lambda_inchidere(automat, stari):
@@ -167,7 +162,7 @@ def lambda_inchidere(automat, stari):
 				if tranzitie[2] not in stari_lambda:
 					stari_lambda.add(tranzitie[2])
 					yes = True
-	return set(sorted(stari_lambda))
+	return stari_lambda
 
 
 def delta_prim(lambda_inchidere_set, automat, litera):
@@ -175,7 +170,7 @@ def delta_prim(lambda_inchidere_set, automat, litera):
 	for tranzitie in automat.delta:
 		if tranzitie[0] in lambda_inchidere_set and tranzitie[1] == litera:
 			delta_prim_set.add(tranzitie[2])
-	return set(sorted(delta_prim_set))
+	return delta_prim_set
 
 
 def prec(c):

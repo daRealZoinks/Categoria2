@@ -45,7 +45,8 @@ class FiniteAutomaton:
 			print("ERROR: Automaton is not valid")
 			return False
 
-		states = list(self.q0)
+		states = set()
+		states.add(self.q0)
 		for symbol in word:
 			new_states = list()
 			for state in states:

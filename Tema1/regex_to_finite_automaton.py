@@ -1,6 +1,55 @@
 from finite_automaton import FiniteAutomaton as Fa
 
 def regex_to_finite_automaton(r):
+	def prec(c):
+		if c == '|':
+			return 1
+		elif c == '.':
+			return 2
+		elif c == '*':
+			return 3
+		elif c == '(':
+			return 0
+		elif c == ')':
+			return 0
+		else:
+			return 4
+
+	def forma_poloneza(text):
+		FP = []
+		OP = []
+
+		for E in text:
+			if E == ' ' or E == '\t':
+				continue
+			if 'a' <= E <= 'c':
+				FP.append(E)
+			elif E == '(':
+				OP.append(E)
+			elif E == ')':
+				while OP[-1] != '(':
+					FP.append(OP.pop())
+				if len(OP) == 0:
+					print("Parantezare invalida")
+					FP = []
+					return FP
+				OP.pop()
+			elif E == '*' or E == '.' or E == '|':
+				while not len(OP) == 0 and OP[-1] != '(' and prec(OP[-1]) >= prec(E):
+					FP.append(OP.pop())
+				OP.append(E)
+			else:
+				print("Caracter invalid")
+				FP = []
+				return FP
+		while not len(OP) == 0:
+			if OP[-1] == '(':
+				print("Parantezare invalida")
+				FP = []
+				return FP
+			FP.append(OP.pop())
+		return FP
+
 	fp = forma_poloneza(r)
 
 	SA = []
@@ -11,7 +60,7 @@ def regex_to_finite_automaton(r):
 			C = Fa()
 
 			C.q0 = "q" + str(contor)
-			C.F.add("q" + str(contor+ 1))
+			C.F.add("q" + str(contor + 1))
 			C.Q.add(C.q0)
 			C.Q.add(list(C.F)[-1])
 			C.sigma.add(char)
@@ -26,13 +75,17 @@ def regex_to_finite_automaton(r):
 			C = Fa()
 
 			C.q0 = "q" + str(contor)
+
+			C.F.add("q" + str(contor + 1))
+
 			C.Q = A.Q | B.Q
 			C.Q.add(C.q0)
-			C.F.add("q" + str(contor + 1))
 			C.Q.add(list(C.F)[-1])
 			C.Q.update({A.q0, B.q0, list(A.F)[-1], list(B.F)[-1]})
+
 			C.sigma = A.sigma | B.sigma
 			C.sigma.add("λ")
+
 			C.delta = A.delta | B.delta
 			C.delta.add((C.q0, "λ", A.q0))
 			C.delta.add((C.q0, "λ", B.q0))
@@ -70,12 +123,16 @@ def regex_to_finite_automaton(r):
 			C = Fa()
 
 			C.q0 = "q" + str(contor)
+
+			C.F.add("q" + str(contor + 1))
+
 			C.Q = A.Q
 			C.Q.add(C.q0)
-			C.F.add("q" + str(contor + 1))
 			C.Q.add(list(C.F)[-1])
 			C.Q.update({A.q0, list(A.F)[-1]})
+
 			C.sigma = A.sigma | {"λ"}
+
 			C.delta = A.delta
 			C.delta.add((C.q0, "λ", A.q0))
 			C.delta.add((list(A.F)[-1], "λ", list(C.F)[-1]))
@@ -86,139 +143,64 @@ def regex_to_finite_automaton(r):
 			SA.append(C)
 
 	if len(SA) != 1:
-		print("EROARE")
+		print("Eroare la conversie")
 		exit(1)
 
-	result = SA.pop()
+	rezultat = SA.pop()
 
 	elemente = dict()
-	elemente["q'0"] = lambda_inchidere(result, [result.q0])
+	def lambda_inchidere(automat, stari):
+		stari_lambda = set(stari)
 
-	# print("delta'(q'0, a) = ", delta_prim(elemente["q'0"], result, "a"))
-	# elemente["q'1"] = lambda_inchidere(result, delta_prim(elemente["q'0"], result, "a"))
-	# print("delta'(q'0, b) = ", delta_prim(elemente["q'0"], result, "b"))
-	# elemente["q'2"] = lambda_inchidere(result, delta_prim(elemente["q'0"], result, "b"))
-	# print("delta'(q'1, a) = ", delta_prim(elemente["q'1"], result, "a"))
-	# elemente["q'3"] = lambda_inchidere(result, delta_prim(elemente["q'1"], result, "a"))
-	# print("delta'(q'1, b) = ", delta_prim(elemente["q'1"], result, "b"))
-	# print("delta'(q'2, a) = ", delta_prim(elemente["q'2"], result, "a"))
-	# print("delta'(q'2, b) = ", delta_prim(elemente["q'2"], result, "b"))
-	# elemente["q'4"] = lambda_inchidere(result, delta_prim(elemente["q'2"], result, "b"))
-	# print("delta'(q'3, a) = ", delta_prim(elemente["q'3"], result, "a"))
-	# print("delta'(q'3, b) = ", delta_prim(elemente["q'3"], result, "b"))
-	# print("delta'(q'4, a) = ", delta_prim(elemente["q'4"], result, "a"))
-	# print("delta'(q'4, b) = ", delta_prim(elemente["q'4"], result, "b"))
+		caracter_gasit = True
+		while caracter_gasit:
+			caracter_gasit = False
+			for tranzitie in automat.delta:
+				if tranzitie[0] in stari_lambda and tranzitie[1] == "λ":
+					if tranzitie[2] not in stari_lambda:
+						stari_lambda.add(tranzitie[2])
+						caracter_gasit = True
+		return stari_lambda
 
-	# automate whats above
+	elemente["q'0"] = lambda_inchidere(rezultat, [rezultat.q0])
 
-	counter = 1
+	contor = 1
 
 	i = 0
 	gata = False
 
+	def delta_prim(lambda_inchidere_set, automat, litera):
+		delta_prim_set = set()
+		for tranzitie in automat.delta:
+			if tranzitie[0] in lambda_inchidere_set and tranzitie[1] == litera:
+				delta_prim_set.add(tranzitie[2])
+		return delta_prim_set
+
 	while True:
-		for char in sorted(result.sigma - {"λ"}):
-			delta = delta_prim(elemente["q'" + str(i)], result, char)
-			print("delta'(q'" , str(i) , ", " , char , ") = ", delta)
-			if delta != set() and lambda_inchidere(result, delta) not in elemente.values():
-				if "q'" + str(counter) not in elemente.keys():
-					elemente["q'" + str(counter)] = lambda_inchidere(result, delta)
-					if result.F.intersection(elemente["q'" + str(counter)]) != set():
+		for char in sorted(rezultat.sigma - {"λ"}):
+			delta = delta_prim(elemente["q'" + str(i)], rezultat, char)
+			if delta != set() and lambda_inchidere(rezultat, delta) not in elemente.values():
+				if "q'" + str(contor) not in elemente.keys():
+					elemente["q'" + str(contor)] = lambda_inchidere(rezultat, delta)
+					if rezultat.F.intersection(elemente["q'" + str(contor)]) != set():
 						gata = True
-					print("q'" , str(counter) , " = ", elemente["q'" + str(counter)])
 					if not gata:
-						counter += 1
-		if i == counter and gata:
+						contor += 1
+		if i == contor and gata:
 			break
 		i += 1
 
-	print()
-	print(elemente)
-
-	new_automaton = Fa()
-	new_automaton.q0 = "q'0"
-	new_automaton.Q = set(elemente.keys())
-	new_automaton.F = {list(elemente.keys())[-1]}
-	new_automaton.sigma = result.sigma
+	M = Fa()
+	M.q0 = "q'0"
+	M.Q = set(elemente.keys())
+	M.F = {list(elemente.keys())[-1]}
+	M.sigma = rezultat.sigma
 
 	for key in elemente.keys():
-		for litera in result.sigma - {"λ"}:
-			delta = delta_prim(elemente[key], result, litera)
+		for litera in rezultat.sigma - {"λ"}:
+			delta = delta_prim(elemente[key], rezultat, litera)
 			for key2 in elemente.keys():
-				if elemente[key2] == lambda_inchidere(result, delta):
-					new_automaton.delta.add((key, litera, key2))
+				if elemente[key2] == lambda_inchidere(rezultat, delta):
+					M.delta.add((key, litera, key2))
 
-	return new_automaton
-
-
-def lambda_inchidere(automat, stari):
-	stari_lambda = set(stari)
-
-	yes = True
-	while yes:
-		yes = False
-		for tranzitie in automat.delta:
-			if tranzitie[0] in stari_lambda and tranzitie[1] == "λ":
-				if tranzitie[2] not in stari_lambda:
-					stari_lambda.add(tranzitie[2])
-					yes = True
-	return stari_lambda
-
-
-def delta_prim(lambda_inchidere_set, automat, litera):
-	delta_prim_set = set()
-	for tranzitie in automat.delta:
-		if tranzitie[0] in lambda_inchidere_set and tranzitie[1] == litera:
-			delta_prim_set.add(tranzitie[2])
-	return delta_prim_set
-
-
-def prec(c):
-	if c == '|':
-		return 1
-	elif c == '.':
-		return 2
-	elif c == '*':
-		return 3
-	elif c == '(':
-		return 0
-	elif c == ')':
-		return 0
-	else:
-		return 4
-
-
-def forma_poloneza(sir):
-	FP = []
-	OP = []
-
-	for E in sir:
-		if E == ' ' or E == '\t':
-			continue
-		if 'a' <= E <= 'c':
-			FP.append(E)
-		elif E == '(':
-			OP.append(E)
-		elif E == ')':
-			while OP[-1] != '(':
-				FP.append(OP.pop())
-			if len(OP) == 0:
-				print("Parantezare incorecta")
-				FP = []
-				return FP
-			OP.pop()
-		elif E == '*' or E == '.' or E == '|':
-			while not len(OP) == 0 and OP[-1] != '(' and prec(OP[-1]) >= prec(E):
-				FP.append(OP.pop())
-			OP.append(E)
-		else:
-			print("Caracter invalid")
-			FP = []
-			return FP
-	while not len(OP) == 0:
-		if OP[-1] == '(':
-			print("Parantezare incorecta")
-			FP = []
-			return FP
-		FP.append(OP.pop())
-	return FP
+	return M

@@ -31,14 +31,16 @@ class FiniteAutomaton:
 
 		return True
 
-	def print_automaton(self):
-		print("Q: ", self.Q)
-		print("sigma: ", self.sigma)
-		print("delta:")
+	def __str__(self):
+		result = str()
+		result += "Q: " + str(self.Q) + "\n"
+		result += "sigma: " + str(self.sigma) + "\n"
+		result += "delta:\n"
 		for rule in self.delta:
-			print("    delta(", rule[0], ",", rule[1], ") =", rule[2])
-		print("q0: ", self.q0)
-		print("F: ", self.F)
+			result += "    delta(" + str(rule[0]) + "," + str(rule[1]) + ") = " + str(rule[2]) + "\n"
+		result += "q0: " + str(self.q0) + "\n"
+		result += "F: " + str(self.F) + "\n"
+		return result
 
 	def check_word(self, word):
 		if not self.verify_automaton():

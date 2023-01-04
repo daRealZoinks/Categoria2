@@ -6,6 +6,17 @@ class FiniteAutomaton:
         self.q0 = str
         self.F = set()
 
+    def __str__(self):
+        result = ""
+        result += "Q: " + str(self.Q) + "\n"
+        result += "sigma: " + str(self.sigma) + "\n"
+        result += "delta:\n"
+        for rule in self.delta:
+            result += "    delta(" + rule[0] + "," + rule[1] + ") = " + rule[2] + "\n"
+        result += "q0: " + str(self.q0) + "\n"
+        result += "F: " + str(self.F) + "\n"
+        return result
+
     def verify_automaton(self):
         if len(self.Q) == 0:
             print("ERROR: Q e gol")
@@ -30,15 +41,6 @@ class FiniteAutomaton:
                 return False
 
         return True
-
-    def print_automaton(self):
-        print("Q: ", self.Q)
-        print("sigma: ", self.sigma)
-        print("delta:")
-        for rule in self.delta:
-            print("    delta(", rule[0], ",", rule[1], ") =", rule[2])
-        print("q0: ", self.q0)
-        print("F: ", self.F)
 
     def check_word(self, word):
         if not self.verify_automaton():

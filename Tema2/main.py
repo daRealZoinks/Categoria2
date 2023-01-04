@@ -20,7 +20,7 @@ def main():
             option = input("Introduceti optiunea: ")
 
             if option == "1":
-                g.print_grammar()
+                print(g)
 
             elif option == "2":
                 n = int(input("Introduceti numarul de cuvinte: "))

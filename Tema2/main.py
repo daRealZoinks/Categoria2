@@ -4,7 +4,7 @@ from GrammarToAutomaton import grammar_to_automaton
 
 def main():
     g = Grammar()
-    g.read_grammar("grammar.txt")  # gramatica de tipul 3
+    g.read_grammar("grammar.txt")
 
     m = grammar_to_automaton(g)
 

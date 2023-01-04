@@ -36,7 +36,7 @@ def main():
             elif option == "3":
                 m = grammar_to_automaton(g)
                 if m is not None:
-                    m.print_automaton()
+                    print(m)
 
             elif option == "4":
                 word = input("Introduceti cuvantul: ")

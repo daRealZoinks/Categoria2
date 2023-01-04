@@ -2,7 +2,7 @@ from Grammar import Grammar
 from FiniteAutomaton import FiniteAutomaton
 
 
-def grammar_to_automaton(g: Grammar) -> FiniteAutomaton | None:
+def grammar_to_automaton(g: Grammar):
     if not g.is_regular():
         return None
 

@@ -11,7 +11,7 @@ def main():
     if g.verify_grammar() and g.is_idc():
         while True:
             print("1. Afisarea gramaticii")
-            print("2. Generarea unui numar cuvant in gramatica G")
+            print("2. Generarea unui cuvant in gramatica G")
             print("3. Afisara rezultatului gramaticii simplificate")
             print("4. Afisarea gramaticii in FNG")
             print("5. Generarea unui cuvant in G + verificarea daca e acceptat de catre automat")

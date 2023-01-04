@@ -54,7 +54,7 @@ def main():
             print("Nu-i asa doamna ca suntem inteligenti si muncitori?? 😎")
             return
         else:
-            print("Option invalida! 😡")
+            print("Optiune invalida! 😡")
             Tries += 1
 
 

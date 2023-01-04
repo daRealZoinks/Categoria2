@@ -20,10 +20,8 @@ class Grammar:
 
     def verify_grammar(self):
         # elementele din VN nu apartin lui VT
-        for symbol_n in self.VN:
-            for symbol_t in self.VT:
-                if symbol_n == symbol_t:
-                    return False
+        if self.VN.intersection(self.VT) != set():
+            return False
 
         # S nu se afla in VN
         if self.S not in self.VN:
@@ -35,14 +33,13 @@ class Grammar:
                 return False
 
         # exista cel putin o productie care sa-l aiba pe S in stanga
-        rule_containing_S = len([rule for rule in self.P if rule[0] == self.S]) > 0
-        if not rule_containing_S:
+        if len([rule for rule in self.P if rule[0] == self.S]) == 0:
             return False
 
         # toate productiile au cel putin un element din VN si VT
         for rule in self.P:
             for symbol in rule[1]:
-                if symbol not in self.VT and symbol not in self.VN:
+                if symbol not in self.VN.union(self.VT):
                     return False
 
         return True
@@ -88,24 +85,12 @@ class Grammar:
         file.close()
 
     def is_idc(self):
-        # verificam daca toate productiile sunt de forma A -> aB
+        # verificam daca toate productiile sunt de forma A -> w, cu A in VN si w in VN reunit cu VT
         for rule in self.P:
-            if len(rule[1]) != 2:
+            if rule[0] not in self.VN:
                 return False
-            if rule[1][0] not in self.VT:
-                return False
-            if rule[1][1] not in self.VN:
-                return False
-
-        # verificam daca exista cel putin o productie care sa aiba S in stanga
-        rule_containing_S = len([rule for rule in self.P if rule[0] == self.S]) > 0
-        if not rule_containing_S:
-            return False
-
-        # verificam daca toate productiile au cel putin un element din VN si VT
-        for rule in self.P:
             for symbol in rule[1]:
-                if symbol not in self.VT and symbol not in self.VN:
+                if symbol not in self.VN and symbol not in self.VT:
                     return False
 
         return True

@@ -8,7 +8,7 @@ def main():
 
     m = None
 
-    if g.verify_grammar() and g.is_regular():
+    if g.verify_grammar() and g.is_idc():
         while True:
             print("1. Afisarea gramaticii")
             print("2. Generarea unui numar n de cuvinte in gramatica G")
@@ -57,8 +57,6 @@ def main():
                 break
             else:
                 print("Optiune invalida")
-
-            print()
     else:
         print("Gramatica nu este valida")
 

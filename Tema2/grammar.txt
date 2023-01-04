@@ -1,10 +1,15 @@
-S A B C
-a b c
+S A B C D
+a b
 S
 
-S -> aA
-A -> aA
+S -> A
+S -> B
 A -> aB
-B -> bC
-C -> cB
-C -> c
+A -> bS
+A -> b
+B -> BD
+B -> Ba
+C -> AS
+C -> b
+D -> bD
+D -> b

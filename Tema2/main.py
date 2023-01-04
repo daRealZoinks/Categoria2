@@ -35,14 +35,14 @@ def main():
 
             elif option == "5":
                 word = g.generate_word()
-                if(m.check_word(word)):
+                if m.check_word(word):
                     print("Cuvantul este acceptat de automat")
                 else:
                     print("Cuvantul nu este acceptat de automat")
 
             elif option == "6":
                 word = input("Introduceti cuvantul: ")
-                if (m.check_word(word)):
+                if m.check_word(word):
                     print("Cuvantul este acceptat de automat")
                 else:
                     print("Cuvantul nu este acceptat de automat")
@@ -52,6 +52,9 @@ def main():
 
             else:
                 print("Optiune invalida")
+
+        print()
+        print()
     else:
         print("Gramatica nu este valida")
 

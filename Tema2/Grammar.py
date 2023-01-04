@@ -96,21 +96,32 @@ class Grammar:
         return True
 
     def simplify(self):
+
+        g = None
+
         # daca nu este IDC, nu se poate simplifica
         if not self.is_idc():
-            return False
+            return g
 
         # daca nu exista nicio productie care sa aiba S in stanga, nu se poate simplifica
-        rule_containing_S = len([rule for rule in self.P if rule[0] == self.S]) > 0
-        if not rule_containing_S:
-            return False
+        if not len([rule for rule in self.P if rule[0] == self.S]) > 0:
+            return g
 
-        # daca exista cel putin o productie care sa aiba S in dreapta, nu se poate simplifica
-        rule_containing_S = len([rule for rule in self.P if rule[1] == self.S]) > 0
-        if rule_containing_S:
-            return False
+        g = Grammar()
+        g.VN = self.VN.copy()
+        g.VT = self.VT.copy()
+        g.S = self.S
+        g.P = self.P.copy()
 
-        return True
+        g.VN = set()
+
+        # TODO : elimina simbolurile neutilizabile
+
+        # TODO : elimina simbolurile inaccesibile
+
+        # TODO : elimina redenumirile
+
+        return g
 
     def to_fng(self):
         # daca nu este IDC, nu se poate transforma in FNG

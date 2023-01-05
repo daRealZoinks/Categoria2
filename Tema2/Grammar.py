@@ -179,6 +179,25 @@ class Grammar:
 
         # TODO : elimina redenumirile
 
+        P = []
+        R = set()
+
+        i = 0
+        P0 = set()
+
+        for tpl in g.P:
+            if tpl[1] not in g.VN:
+                P0.add(tpl)
+            else:
+                R.add(tpl)
+
+        while True:
+            i=i+1
+
+            if P[i] == P[i-1]:
+                g.P = P[i]
+                break
+
         return g
 
     def to_fng(self):

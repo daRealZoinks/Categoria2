@@ -116,7 +116,66 @@ class Grammar:
 
         # TODO : elimina simbolurile neutilizabile
 
+        V = []
+
+        i = 0
+        V0 = set()
+        V.append(V0)
+
+        while True:
+            i = i + 1
+
+            valid_symbols = set()
+            for tpl in g.P:
+                if tpl[1] in V[i-1].union(g.VT):
+                    valid_symbols.add(tpl[0])
+
+            Vi = V[i - 1].union(valid_symbols)
+            V.append(Vi)
+
+            if V[i] == V[i-1]:
+                g.VN = Vi
+                break
+
+        newP = []
+        for tpl in g.P:
+            if tpl[0] in g.VN:
+                newP.append(tpl)
+
+        g.P = newP
+
         # TODO : elimina simbolurile inaccesibile
+
+        V = []
+
+        i = 0
+        V0 = set()
+        V0.add(g.S)
+        V.append(V0)
+
+        while True:
+            i = i+1
+
+            valid_symbols = set()
+            for tpl in g.P:
+                if tpl[0] in V[i-1]:
+                    for A in g.VN:
+                        if A in tpl[1]:
+                            valid_symbols.add(A)
+
+            Vi = V[i-1].union(valid_symbols)
+            V.append(Vi)
+
+            if V[i] == V[i-1]:
+                g.VN = Vi
+                break
+
+        newP = []
+        for tpl in g.P:
+            if tpl[0] in g.VN:
+                newP.append(tpl)
+
+        g.P = newP
 
         # TODO : elimina redenumirile
 

@@ -1,20 +1,34 @@
+# asta e un automat pushdown
+class Production:
+    def __init__(self, argumente, rezultate):
+        self.argumente = argumente
+        self.rezultate = rezultate
+
+    def __str__(self):
+        return str(self.argumente) + " -> " + str(self.rezultate)
+
 class FiniteAutomaton:
+
     def __init__(self):
         self.Q = set()
         self.sigma = set()
-        self.delta = set()
+        self.gama = set()
         self.q0 = str
+        self.Z0 = str
         self.F = set()
+        self.delta = list()
 
     def __str__(self):
         result = ""
         result += "Q: " + str(self.Q) + "\n"
         result += "sigma: " + str(self.sigma) + "\n"
-        result += "delta:\n"
-        for rule in self.delta:
-            result += "    delta(" + rule[0] + "," + rule[1] + ") = " + rule[2] + "\n"
+        result += "gama: " + str(self.gama) + "\n"
         result += "q0: " + str(self.q0) + "\n"
+        result += "Z0: " + str(self.Z0) + "\n"
         result += "F: " + str(self.F) + "\n"
+        result += "delta:\n"
+        for transition in self.delta:
+            result += str(transition) + "\n"
         return result
 
     def verify_automaton(self):
@@ -26,19 +40,21 @@ class FiniteAutomaton:
             print("ERROR: sigma e gol")
             return False
 
-        if self.q0 not in self.Q:
-            print("ERROR: q0 nu exista in Q")
+        if len(self.gama) == 0:
+            print("ERROR: gama e gol")
             return False
 
-        for state in self.F:
-            if state not in self.Q:
-                print("ERROR: F nu e inclus in Q")
-                return False
+        if self.q0 not in self.Q:
+            print("ERROR: q0 nu e in Q")
+            return False
 
-        for transition in self.delta:
-            if transition[0] not in self.Q or transition[1] not in self.sigma or transition[2] not in self.Q:
-                print("ERROR: delta nu e o functie din Q x sigma spre Q")
-                return False
+        if self.Z0 not in self.gama:
+            print("ERROR: Z0 nu e in gama")
+            return False
+
+        if len(self.F) == 0:
+            print("ERROR: F e gol")
+            return False
 
         return True
 
@@ -47,26 +63,40 @@ class FiniteAutomaton:
             print("ERROR: Automatul nu e valid")
             return False
 
-        states = list(self.q0)
-        for symbol in word:
-            new_states = list()
-            for state in states:
-                for transition in self.delta:
-                    if transition[0] == state and transition[1] == symbol:
-                        new_states.append(transition[2])
-            states = new_states
+        word = word + " "
 
-        for state in states:
-            if state in self.F:
-                return True
+        state = self.q0
+        stack = [self.Z0]
 
-        return False
+        for letter in word:
+            for production in self.delta:
+                if production.argumente[0] == state and production.argumente[1] == letter and production.argumente[2] == stack[-1]:
+                    state = production.rezultate[0]
+                    stack.pop()
+                    for element in reversed(production.rezultate[1]):
+                        if element != " ":
+                            stack.append(element)
+                    break
+            else:
+                return False
+
+        return state in self.F and len(stack) == 1 and stack[0] == self.Z0
+
+
 
     def is_deterministic(self):
-        for transition in self.delta:
-            for transition2 in self.delta:
-                if transition[0] == transition2[0] and \
-                        transition[1] == transition2[1] and \
-                        transition[2] != transition2[2]:
+        for state in self.Q:
+            for symbol in self.sigma:
+                transitions = [transition for transition in self.delta if transition[0] == state and transition[1] == symbol]
+                if len(transitions) > 1:
                     return False
+
+        # pt fiecare q din Q si Z din gama, daca delta(q, lambda, Z) = multime vida atunci delta(q, a, Z) = multimea vida pt orice a din gama
+        for state in self.Q:
+            for symbol in self.gama:
+                if len([transition for transition in self.delta if transition[0] == state and transition[1] == symbol]) == 0:
+                    for symbol2 in self.gama:
+                        if len([transition for transition in self.delta if transition[0] == state and transition[1] == symbol2]) != 0:
+                            return False
+
         return True

@@ -5,8 +5,8 @@ class Grammar:
     def __init__(self):
         self.VN = set()
         self.VT = set()
-        self.S = None
-        self.P = []
+        self.S = str()
+        self.P = list()
 
     def __str__(self):
         result = ""
@@ -85,7 +85,6 @@ class Grammar:
         file.close()
 
     def is_idc(self):
-        # verificam daca toate productiile sunt de forma A -> w, cu A in VN si w in VN reunit cu VT
         for rule in self.P:
             if rule[0] not in self.VN:
                 return False

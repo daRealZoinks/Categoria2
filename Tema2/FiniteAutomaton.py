@@ -70,7 +70,7 @@ class FiniteAutomaton:
 
         for letter in word:
             for production in self.delta:
-                if production.argumente[0] == state and production.argumente[1] == letter and production.argumente[2] == stack[-1]:
+                if production.argument[0] == state and production.argument[1] == letter and production.argument[2] == stack[-1]:
                     state = production.rezultate[0]
                     stack.pop()
                     for element in reversed(production.rezultate[1]):
@@ -81,8 +81,6 @@ class FiniteAutomaton:
                 return False
 
         return state in self.F and len(stack) == 1 and stack[0] == self.Z0
-
-
 
     def is_deterministic(self):
         for state in self.Q:

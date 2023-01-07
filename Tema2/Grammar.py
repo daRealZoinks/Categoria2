@@ -1,5 +1,12 @@
 import random
 
+class Production:
+    def __init__(self, argument, rezultate):
+        self.argument = argument
+        self.rezultate = rezultate
+
+    def __str__(self):
+        return str(self.argument) + " -> " + str(self.rezultate)
 
 class Grammar:
     def __init__(self):
@@ -15,7 +22,7 @@ class Grammar:
         result += "S: " + str(self.S) + "\n"
         result += "P:\n"
         for rule in self.P:
-            result += "    " + rule[0] + " -> " + rule[1] + "\n"
+            result += str(rule) + "\n"
         return result
 
     def verify_grammar(self):
@@ -29,31 +36,32 @@ class Grammar:
 
         # pt fiecare productie, partea stanga contine cel putin un element din VN
         for rule in self.P:
-            if rule[0] not in self.VN:
+            if rule.argument not in self.VN:
                 return False
 
         # exista cel putin o productie care sa-l aiba pe S in stanga
-        if len([rule for rule in self.P if rule[0] == self.S]) == 0:
+        if len([rule for rule in self.P if rule.argument == self.S]) == 0:
             return False
 
         # toate productiile au cel putin un element din VN si VT
         for rule in self.P:
-            for symbol in rule[1]:
+            for symbol in rule.rezultate:
                 if symbol not in self.VN.union(self.VT):
                     return False
 
         return True
 
     def is_regular(self):
+
         for rule in self.P:
-            if len(rule[1]) > 2:
+            if len(rule.rezultate) > 2:
                 return False
 
         for rule in self.P:
-            if rule[1][0] not in self.VT:
+            if rule.rezultate[0] not in self.VT:
                 return False
-            if len(rule[1]) == 2:
-                if rule[1][1] not in self.VN:
+            if len(rule.rezultate) == 2:
+                if rule.rezultate[1] not in self.VN:
                     return False
 
         return True
@@ -62,13 +70,13 @@ class Grammar:
         word = self.S
         print(self.S, end=" ")
         while True:
-            applicable_rules = [rule for rule in self.P if rule[0] in word]
+            applicable_rules = [rule for rule in self.P if rule.argument in word]
             if len(applicable_rules) == 0:
                 print()
                 return word
             chosen_rule = random.choice(applicable_rules)
-            if chosen_rule[0] in word:
-                word = word.replace(chosen_rule[0], chosen_rule[1], 1)
+            if chosen_rule.argument in word:
+                word = word.replace(chosen_rule.argument, "".join(chosen_rule.rezultate), 1)
                 print(" -> ", word, end=" ")
 
     def read_grammar(self, file_name):
@@ -80,15 +88,18 @@ class Grammar:
         file.readline()
 
         for line in file:
-            self.P.append(tuple(line.strip().split(" -> ")))
+            argument = line.split("->")[0].strip()
+            # make result a list of each symbol on the right side of the production
+            result = list(line.split("->")[1].strip())
+            self.P.append(Production(argument, result))
 
         file.close()
 
     def is_idc(self):
         for rule in self.P:
-            if rule[0] not in self.VN:
+            if rule.argument not in self.VN:
                 return False
-            for symbol in rule[1]:
+            for symbol in rule.rezultate:
                 if symbol not in self.VN and symbol not in self.VT:
                     return False
 
@@ -103,7 +114,7 @@ class Grammar:
             return g
 
         # daca nu exista nicio productie care sa aiba S in stanga, nu se poate simplifica
-        if not len([rule for rule in self.P if rule[0] == self.S]) > 0:
+        if not len([rule for rule in self.P if rule.argument == self.S]) > 0:
             return g
 
         g = Grammar()
@@ -127,14 +138,4 @@ class Grammar:
         if not self.is_idc():
             return False
 
-        # daca nu exista nicio productie care sa aiba S in stanga, nu se poate transforma in FNG
-        rule_containing_S = len([rule for rule in self.P if rule[0] == self.S]) > 0
-        if not rule_containing_S:
-            return False
-
-        # daca exista cel putin o productie care sa aiba S in dreapta, nu se poate transforma in FNG
-        rule_containing_S = len([rule for rule in self.P if rule[1] == self.S]) > 0
-        if rule_containing_S:
-            return False
-
-        return True
+        pass

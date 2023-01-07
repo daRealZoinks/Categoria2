@@ -52,7 +52,6 @@ class Grammar:
         return True
 
     def is_regular(self):
-
         for rule in self.P:
             if len(rule.rezultate) > 2:
                 return False
@@ -89,7 +88,6 @@ class Grammar:
 
         for line in file:
             argument = line.split("->")[0].strip()
-            # make result a list of each symbol on the right side of the production
             result = list(line.split("->")[1].strip())
             self.P.append(Production(argument, result))
 
@@ -127,9 +125,87 @@ class Grammar:
 
         # TODO : elimina simbolurile neutilizabile
 
+        V = []
+
+        i = 0
+        V0 = set()
+        V.append(V0)
+
+        while True:
+            i = i + 1
+
+            valid_symbols = set()
+            for tpl in g.P:
+                if tpl[1] in V[i-1].union(g.VT):
+                    valid_symbols.add(tpl[0])
+
+            Vi = V[i - 1].union(valid_symbols)
+            V.append(Vi)
+
+            if V[i] == V[i-1]:
+                g.VN = Vi
+                break
+
+        newP = []
+        for tpl in g.P:
+            if tpl[0] in g.VN:
+                newP.append(tpl)
+
+        g.P = newP
+
         # TODO : elimina simbolurile inaccesibile
 
+        V = []
+
+        i = 0
+        V0 = set()
+        V0.add(g.S)
+        V.append(V0)
+
+        while True:
+            i = i+1
+
+            valid_symbols = set()
+            for tpl in g.P:
+                if tpl[0] in V[i-1]:
+                    for A in g.VN:
+                        if A in tpl[1]:
+                            valid_symbols.add(A)
+
+            Vi = V[i-1].union(valid_symbols)
+            V.append(Vi)
+
+            if V[i] == V[i-1]:
+                g.VN = Vi
+                break
+
+        newP = []
+        for tpl in g.P:
+            if tpl[0] in g.VN:
+                newP.append(tpl)
+
+        g.P = newP
+
         # TODO : elimina redenumirile
+
+        P = []
+        R = set()
+
+        i = 0
+        P0 = set()
+
+        for tpl in g.P:
+            if tpl[1] not in g.VN:
+                P0.add(tpl)
+            else:
+                R.add(tpl)
+
+        while True:
+            i=i+1
+
+            if P[i] == P[i-1]:
+                g.P = P[i]
+                break
 
         return g
 

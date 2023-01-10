@@ -2,11 +2,11 @@ import random
 
 class Production:
     def __init__(self):
-        self.stanga = list()
-        self.dreapta = list()
+        self.left = list()
+        self.right = list()
 
     def __str__(self):
-        return str(self.stanga) + " -> " + str(self.dreapta)
+        return str(self.left) + " -> " + str(self.right)
 
 class Grammar:
     def __init__(self):
@@ -36,16 +36,16 @@ class Grammar:
 
         # pt fiecare productie, partea stanga contine cel putin un element din VN
         for rule in self.P:
-            if rule.stanga not in self.VN:
+            if rule.left not in self.VN:
                 return False
 
         # exista cel putin o productie care sa-l aiba pe S in stanga
-        if len([rule for rule in self.P if rule.stanga == self.S]) == 0:
+        if len([rule for rule in self.P if rule.left == self.S]) == 0:
             return False
 
         # toate productiile au cel putin un element din VN si VT
         for rule in self.P:
-            for symbol in rule.dreapta:
+            for symbol in rule.right:
                 if symbol not in self.VN.union(self.VT):
                     return False
 
@@ -53,14 +53,14 @@ class Grammar:
 
     def is_regular(self):
         for rule in self.P:
-            if len(rule.dreapta) > 2:
+            if len(rule.right) > 2:
                 return False
 
         for rule in self.P:
-            if rule.dreapta[0] not in self.VT:
+            if rule.right[0] not in self.VT:
                 return False
-            if len(rule.dreapta) == 2:
-                if rule.dreapta[1] not in self.VN:
+            if len(rule.right) == 2:
+                if rule.right[1] not in self.VN:
                     return False
 
         return True
@@ -69,13 +69,13 @@ class Grammar:
         word = self.S
         print(self.S, end=" ")
         while True:
-            applicable_rules = [rule for rule in self.P if rule.stanga in word]
+            applicable_rules = [rule for rule in self.P if rule.left in word]
             if len(applicable_rules) == 0:
                 print()
                 return word
             chosen_rule = random.choice(applicable_rules)
-            if chosen_rule.stanga in word:
-                word = word.replace(chosen_rule.stanga, "".join(chosen_rule.dreapta), 1)
+            if chosen_rule.left in word:
+                word = word.replace(chosen_rule.left, "".join(chosen_rule.right), 1)
                 print(" -> ", word, end=" ")
 
     def read_grammar(self, file_name):
@@ -90,17 +90,17 @@ class Grammar:
             stanga = line.split("->")[0].strip()
             dreapta = list(line.split("->")[1].strip())
             rule = Production()
-            rule.stanga = stanga
-            rule.dreapta = dreapta
+            rule.left = stanga
+            rule.right = dreapta
             self.P.append(rule)
 
         file.close()
 
     def is_idc(self):
         for rule in self.P:
-            if rule.stanga not in self.VN:
+            if rule.left not in self.VN:
                 return False
-            for symbol in rule.dreapta:
+            for symbol in rule.right:
                 if symbol not in self.VN and symbol not in self.VT:
                     return False
 
@@ -113,7 +113,7 @@ class Grammar:
             return None
 
         # daca nu exista nicio productie care sa aiba S in stanga, nu se poate simplifica
-        if not len([rule for rule in self.P if rule.stanga == self.S]) > 0:
+        if not len([rule for rule in self.P if rule.left == self.S]) > 0:
             return None
 
         g = Grammar()
@@ -136,9 +136,9 @@ class Grammar:
             i = i + 1
 
             valid_symbols = set()
-            for tpl in g.P:
-                if tpl[1] in V[i-1].union(g.VT):
-                    valid_symbols.add(tpl[0])
+            for rule in g.P:
+                if rule.left in V[i - 1].union(g.VT):
+                    valid_symbols.add(rule.argument)
 
             Vi = V[i - 1].union(valid_symbols)
             V.append(Vi)
@@ -148,9 +148,9 @@ class Grammar:
                 break
 
         newP = []
-        for tpl in g.P:
-            if tpl[0] in g.VN:
-                newP.append(tpl)
+        for rule in g.P:
+            if rule.left in g.VN:
+                newP.append(rule)
 
         g.P = newP
 
@@ -167,10 +167,10 @@ class Grammar:
             i = i+1
 
             valid_symbols = set()
-            for tpl in g.P:
-                if tpl[0] in V[i-1]:
+            for rule in g.P:
+                if rule.left in V[i - 1]:
                     for A in g.VN:
-                        if A in tpl[1]:
+                        if A in rule.right:
                             valid_symbols.add(A)
 
             Vi = V[i-1].union(valid_symbols)
@@ -181,9 +181,9 @@ class Grammar:
                 break
 
         newP = []
-        for tpl in g.P:
-            if tpl[0] in g.VN:
-                newP.append(tpl)
+        for rule in g.P:
+            if rule.left in g.VN:
+                newP.append(rule)
 
         g.P = newP
 
@@ -195,11 +195,11 @@ class Grammar:
         i = 0
         P0 = set()
 
-        for tpl in g.P:
-            if tpl[1] not in g.VN:
-                P0.add(tpl)
+        for rule in g.P:
+            if rule.left not in g.VN:
+                P0.add(rule)
             else:
-                R.add(tpl)
+                R.add(rule)
 
         while True:
             i=i+1

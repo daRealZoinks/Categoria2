@@ -105,15 +105,13 @@ class Grammar:
 
     def simplify(self):
 
-        g = None
-
         # daca nu este IDC, nu se poate simplifica
         if not self.is_idc():
-            return g
+            return None
 
         # daca nu exista nicio productie care sa aiba S in stanga, nu se poate simplifica
         if not len([rule for rule in self.P if rule.argument == self.S]) > 0:
-            return g
+            return None
 
         g = Grammar()
         g.VN = self.VN.copy()

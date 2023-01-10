@@ -211,8 +211,43 @@ class Grammar:
         return g
 
     def to_fng(self):
-        # daca nu este IDC, nu se poate transforma in FNG
-        if not self.is_idc():
-            return False
+            # daca nu este IDC, nu se poate transforma
+            if not self.is_idc():
+                return None
 
-        pass
+            # daca nu exista nicio productie care sa aiba S in stanga, nu se poate transforma
+            if not len([rule for rule in self.P if rule.stanga == self.S]) > 0:
+                return None
+
+            g = Grammar()
+            g.VN = self.VN.copy()
+            g.VT = self.VT.copy()
+            g.S = self.S
+            g.P = self.P.copy()
+
+            # TODO : FA mizeria asta ordinara
+
+            # Case 1
+            # G1 = {S → aAB | aB, A → aA | a, B → bB | b}
+            # The production rules of G1 satisfy the rules specified for GNF, then the grammar G1 is in GNF.
+
+            # Case 2
+            # G2 = {S → aAB | aB, A → aA | ε, B → bB | ε}
+            # The production rule of G2 is not satisfying the rules specified for GNF as
+            # A → ε and B → ε contain ε(only the start symbol can generate ε).
+            # So, the grammar G2 is not in GNF.
+
+            # Steps for converting CFG into GNF
+            # Step 1 − Convert the grammar into CNF. If the given grammar is not in CNF,
+            # convert it into CNF.
+
+            # Step 2 − If the grammar consists of left recursion, eliminate it. If the context
+            # free grammar contains any left recursion, eliminate it.
+
+            # Step 3 − In the grammar, convert the given production rule into GNF form. If
+            # any production rule in the grammar is not in GNF form, convert it.
+
+            # Step 1
+
+
+            return g

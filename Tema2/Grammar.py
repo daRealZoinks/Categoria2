@@ -124,7 +124,7 @@ class Grammar:
 
         g.VN = set()
 
-        # TODO : elimina simbolurile neutilizabile
+        # pasul 1
 
         V = []
 
@@ -137,8 +137,12 @@ class Grammar:
 
             valid_symbols = set()
             for rule in g.P:
-                if rule.left in V[i - 1].union(g.VT):
-                    valid_symbols.add(rule.argument)
+                valid = True
+                for letter in rule.right:
+                    if letter not in V[i - 1].union(g.VT):
+                        valid = False
+                if valid:
+                    valid_symbols.add(rule.left)
 
             Vi = V[i - 1].union(valid_symbols)
             V.append(Vi)
@@ -150,11 +154,16 @@ class Grammar:
         newP = []
         for rule in g.P:
             if rule.left in g.VN:
-                newP.append(rule)
+                valid = True
+                for letter in rule.right:
+                    if letter not in g.VN.union(g.VT):
+                        valid = False
+                if valid:
+                    newP.append(rule)
 
         g.P = newP
 
-        # TODO : elimina simbolurile inaccesibile
+        # pasul 2
 
         V = []
 

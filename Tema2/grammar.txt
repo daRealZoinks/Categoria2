@@ -1,13 +1,15 @@
 S A B C D
-a b c
+a b
 S
 
-S -> AB
-S -> AD
-S -> a
-A -> AD
-A -> a
-B -> SC
-C -> CD
-C -> c
+S -> A
+S -> B
+A -> aB
+A -> bS
+A -> b
+B -> BD
+B -> Ba
+C -> AS
+C -> b
+D -> bD
 D -> b

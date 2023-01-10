@@ -1,12 +1,12 @@
 import random
 
 class Production:
-    def __init__(self, argument, rezultate):
-        self.argument = argument
-        self.rezultate = rezultate
+    def __init__(self):
+        self.stanga = list()
+        self.dreapta = list()
 
     def __str__(self):
-        return str(self.argument) + " -> " + str(self.rezultate)
+        return str(self.stanga) + " -> " + str(self.dreapta)
 
 class Grammar:
     def __init__(self):
@@ -36,16 +36,16 @@ class Grammar:
 
         # pt fiecare productie, partea stanga contine cel putin un element din VN
         for rule in self.P:
-            if rule.argument not in self.VN:
+            if rule.stanga not in self.VN:
                 return False
 
         # exista cel putin o productie care sa-l aiba pe S in stanga
-        if len([rule for rule in self.P if rule.argument == self.S]) == 0:
+        if len([rule for rule in self.P if rule.stanga == self.S]) == 0:
             return False
 
         # toate productiile au cel putin un element din VN si VT
         for rule in self.P:
-            for symbol in rule.rezultate:
+            for symbol in rule.dreapta:
                 if symbol not in self.VN.union(self.VT):
                     return False
 
@@ -53,14 +53,14 @@ class Grammar:
 
     def is_regular(self):
         for rule in self.P:
-            if len(rule.rezultate) > 2:
+            if len(rule.dreapta) > 2:
                 return False
 
         for rule in self.P:
-            if rule.rezultate[0] not in self.VT:
+            if rule.dreapta[0] not in self.VT:
                 return False
-            if len(rule.rezultate) == 2:
-                if rule.rezultate[1] not in self.VN:
+            if len(rule.dreapta) == 2:
+                if rule.dreapta[1] not in self.VN:
                     return False
 
         return True
@@ -69,13 +69,13 @@ class Grammar:
         word = self.S
         print(self.S, end=" ")
         while True:
-            applicable_rules = [rule for rule in self.P if rule.argument in word]
+            applicable_rules = [rule for rule in self.P if rule.stanga in word]
             if len(applicable_rules) == 0:
                 print()
                 return word
             chosen_rule = random.choice(applicable_rules)
-            if chosen_rule.argument in word:
-                word = word.replace(chosen_rule.argument, "".join(chosen_rule.rezultate), 1)
+            if chosen_rule.stanga in word:
+                word = word.replace(chosen_rule.stanga, "".join(chosen_rule.dreapta), 1)
                 print(" -> ", word, end=" ")
 
     def read_grammar(self, file_name):
@@ -87,17 +87,20 @@ class Grammar:
         file.readline()
 
         for line in file:
-            argument = line.split("->")[0].strip()
-            result = list(line.split("->")[1].strip())
-            self.P.append(Production(argument, result))
+            stanga = line.split("->")[0].strip()
+            dreapta = list(line.split("->")[1].strip())
+            rule = Production()
+            rule.stanga = stanga
+            rule.dreapta = dreapta
+            self.P.append(rule)
 
         file.close()
 
     def is_idc(self):
         for rule in self.P:
-            if rule.argument not in self.VN:
+            if rule.stanga not in self.VN:
                 return False
-            for symbol in rule.rezultate:
+            for symbol in rule.dreapta:
                 if symbol not in self.VN and symbol not in self.VT:
                     return False
 
@@ -110,7 +113,7 @@ class Grammar:
             return None
 
         # daca nu exista nicio productie care sa aiba S in stanga, nu se poate simplifica
-        if not len([rule for rule in self.P if rule.argument == self.S]) > 0:
+        if not len([rule for rule in self.P if rule.stanga == self.S]) > 0:
             return None
 
         g = Grammar()

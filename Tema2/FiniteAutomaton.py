@@ -70,10 +70,10 @@ class FiniteAutomaton:
 
         for letter in word:
             for production in self.delta:
-                if production.argument[0] == state and production.argument[1] == letter and production.argument[2] == stack[-1]:
-                    state = production.rezultate[0]
+                if production.stanga[0] == state and production.stanga[1] == letter and production.stanga[2] == stack[-1]:
+                    state = production.dreapta[0]
                     stack.pop()
-                    for element in reversed(production.rezultate[1]):
+                    for element in reversed(production.dreapta[1]):
                         if element != " ":
                             stack.append(element)
                     break

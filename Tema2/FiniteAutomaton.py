@@ -1,4 +1,3 @@
-# asta e un automat pushdown
 class Production:
     def __init__(self, argumente, rezultate):
         self.argumente = argumente

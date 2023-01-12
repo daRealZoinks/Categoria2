@@ -6,7 +6,18 @@ class Production:
         self.right = list()
 
     def __str__(self):
-        return str(self.left) + " -> " + str(self.right)
+        return str(self.left) + " -> " + str(''.join(self.right))
+
+    def __eq__(self, other):
+        return self.left == other.left and self.right == other.right
+
+    def __hash__(self):
+        return hash(str(self))
+
+    def __lt__(self, other):
+        if self.left == other.left:
+            return self.right < other.right
+        return self.left < other.left
 
 class Grammar:
     def __init__(self):
@@ -21,6 +32,7 @@ class Grammar:
         result += "VT: " + str(self.VT) + "\n"
         result += "S: " + str(self.S) + "\n"
         result += "P:\n"
+        self.P.sort()
         for rule in self.P:
             result += str(rule) + "\n"
         return result
@@ -105,6 +117,7 @@ class Grammar:
                     return False
 
         return True
+
     def simplify(self):
         """to fnc"""
 
@@ -223,6 +236,7 @@ class Grammar:
             i = i + 1
             Pi = P[i - 1].copy()
 
+            # for rename in R:
             for rename in R:
                 for symbol in rename.right:
                     for rule in P[i-1]:
@@ -233,7 +247,7 @@ class Grammar:
                             Pi.add(new_rule)
 
             if Pi == P[i - 1]:
-                g.P = Pi
+                g.P = list(Pi)
                 break
             P.append(Pi)
 

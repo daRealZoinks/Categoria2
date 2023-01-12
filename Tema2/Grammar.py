@@ -106,7 +106,6 @@ class Grammar:
 
         return True
     def simplify(self):
-        """to fnc"""
 
         # daca nu este IDC, nu se poate simplifica
         if not self.is_idc():
@@ -124,7 +123,7 @@ class Grammar:
 
         g.VN = set()
 
-        # pasul 1
+        # pasul 1: elimina simbolurile neutilizabile
 
         V = []
 
@@ -163,7 +162,7 @@ class Grammar:
 
         g.P = newP
 
-        # pasul 2
+        # pasul 2: elimina simbolurile inaccesibile
 
         V = []
 
@@ -196,7 +195,7 @@ class Grammar:
 
         g.P = newP
 
-        # TODO : elimina redenumirile
+        # pasul 3: elimina redenumirile
 
         def has_derivation(A):
             for rule in g.P:

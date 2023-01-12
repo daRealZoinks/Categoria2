@@ -1,15 +1,11 @@
-S A B C D
-a b
+S T L
+a b + * [ ]
 S
 
-S -> A
-S -> B
-A -> aB
-A -> bS
-A -> b
-B -> BD
-B -> Ba
-C -> AS
-C -> b
-D -> bD
-D -> b
+S -> T+S
+S -> T
+T -> L*T
+T -> L
+L -> [S]
+L -> a
+L -> b

@@ -105,8 +105,8 @@ class Grammar:
                     return False
 
         return True
-
     def simplify(self):
+        """to fnc"""
 
         # daca nu este IDC, nu se poate simplifica
         if not self.is_idc():
@@ -198,24 +198,44 @@ class Grammar:
 
         # TODO : elimina redenumirile
 
+        def has_derivation(A):
+            for rule in g.P:
+                if A in rule.right:
+                    return True
+            return False
+        def is_rename(rule):
+            return len(rule.right) == 1 and rule.right[0] in g.VN
+
         P = []
-        R = set()
+        R = set() # set that keeps all the renames
 
         i = 0
         P0 = set()
 
         for rule in g.P:
-            if rule.left not in g.VN:
+            if not is_rename(rule):
                 P0.add(rule)
             else:
                 R.add(rule)
 
+        P.append(P0)
         while True:
-            i=i+1
+            i = i + 1
+            Pi = P[i - 1].copy()
 
-            if P[i] == P[i-1]:
-                g.P = P[i]
+            for rename in R:
+                for symbol in rename.right:
+                    for rule in P[i-1]:
+                        if rule.left == symbol:
+                            new_rule = Production()
+                            new_rule.left = rename.left
+                            new_rule.right = rule.right
+                            Pi.add(new_rule)
+
+            if Pi == P[i - 1]:
+                g.P = Pi
                 break
+            P.append(Pi)
 
         return g
 

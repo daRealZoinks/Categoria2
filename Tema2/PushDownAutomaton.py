@@ -1,13 +1,12 @@
 class Production:
-    def __init__(self, argumente, rezultate):
-        self.argumente = argumente
-        self.rezultate = rezultate
+    def __init__(self, left:list, right:tuple[str, list[str]]):
+        self.left = left
+        self.right = right
 
     def __str__(self):
-        return str(self.argumente) + " -> " + str(self.rezultate)
+        return str(self.left) + " -> " + str(self.right)
 
 class FiniteAutomaton:
-
     def __init__(self):
         self.Q = set()
         self.sigma = set()
@@ -51,8 +50,8 @@ class FiniteAutomaton:
             print("ERROR: Z0 nu e in gama")
             return False
 
-        if len(self.F) == 0:
-            print("ERROR: F e gol")
+        if not self.F.issubset(self.Q):
+            print("ERROR: F nu e inclus in Q")
             return False
 
         return True

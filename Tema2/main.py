@@ -1,4 +1,4 @@
-from Grammar import Grammar
+from GrammarIDC import Grammar
 from GrammarToAutomaton import grammar_to_automaton
 
 

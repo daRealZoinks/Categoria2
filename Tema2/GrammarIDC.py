@@ -2,8 +2,8 @@ import random
 
 class Production:
     def __init__(self):
-        self.left = list()
-        self.right = list()
+        self.left = str
+        self.right = list[str]
 
     def __str__(self):
         return str(self.left) + " -> " + str(''.join(self.right))
@@ -99,11 +99,11 @@ class Grammar:
         file.readline()
 
         for line in file:
-            stanga = line.split("->")[0].strip()
-            dreapta = list(line.split("->")[1].strip())
+            left = line.split("->")[0].strip()
+            right = list(line.split("->")[1].strip())
             rule = Production()
-            rule.left = stanga
-            rule.right = dreapta
+            rule.left = left
+            rule.right = right
             self.P.append(rule)
 
         file.close()
@@ -253,43 +253,110 @@ class Grammar:
         return g
 
     def to_fng(self):
-            # daca nu este IDC, nu se poate transforma
-            if not self.is_idc():
-                return None
+        # daca nu este IDC, nu se poate transforma
+        if not self.is_idc():
+            return None
 
-            # daca nu exista nicio productie care sa aiba S in stanga, nu se poate transforma
-            if not len([rule for rule in self.P if rule.stanga == self.S]) > 0:
-                return None
+        # daca nu exista nicio productie care sa aiba S in stanga, nu se poate transforma
+        if not len([rule for rule in self.P if rule.left == self.S]) > 0:
+            return None
 
-            g = Grammar()
-            g.VN = self.VN.copy()
-            g.VT = self.VT.copy()
-            g.S = self.S
-            g.P = self.P.copy()
+        # TODO : FA mizeria asta ordinara
 
-            # TODO : FA mizeria asta ordinara
+        # forma normala chomsky
 
-            # Case 1
-            # G1 = {S → aAB | aB, A → aA | a, B → bB | b}
-            # The production rules of G1 satisfy the rules specified for GNF, then the grammar G1 is in GNF.
+        g = self.simplify()
 
-            # Case 2
-            # G2 = {S → aAB | aB, A → aA | ε, B → bB | ε}
-            # The production rule of G2 is not satisfying the rules specified for GNF as
-            # A → ε and B → ε contain ε(only the start symbol can generate ε).
-            # So, the grammar G2 is not in GNF.
+        # void Grammar::ToFNG()
+        # {
+        # // luam pe rand fiecare neterminal din VN
+        # std::vector < Production > Zprod;
+        # char lastNonterminal = m_VN[m_VN.size() - 1];
+        # for (int index = 0; index < m_VN.size(); index++)
+        # {
+        #   // luam fiecare neterminal-productie
+        #   // avem doua cazuri, daca gasim o neterminal-productie care se duce
+        #   for (int jndex = 0; jndex < m_P.size(); jndex++)
+        #   {
+        #       int Rang = m_VN.find(m_P[jndex].right[0]);
+        #       //Caz 1: din neterminal in neterminal cu rang mai mic
+        # 		//daca scoatem ultima conditie din if, face si pasul 3 in care modificam productiile [...]
+        # 		//[...] care au in stanga Z, Z1 etc.
+        #       if (Rang != std::string::npos & & Rang < index & & m_P[jndex].left[0] == m_VN[index] & & m_P[jndex].left[0] <= lastNonterminal)
+        #       {
+        #           std:: string nt;
+        #           nt.push_back(m_P[jndex].right[0]);
+        #           std::vector < int > indices;
+        #           FindAllLeftSideProdIndices(nt, indices);
+        #           //aici are loc inlocuirea productiilor (adaugare productii noi + stergere productie parcursa)
+        #           for (auto k: indices)
+        #           {
+        #               Production newP;
+        #               newP.left = m_P[jndex].left;
+        #               newP.right = m_P[k].right + m_P[jndex].right.substr(1, m_P[jndex].right.size() - 1);
+        #               m_P.push_back(newP);
+        #           }
+        #
+        #           m_P.erase(m_P.begin() + jndex);
+        #           jndex--;
+        #       }
+        #
+        #       // Caz 2: din neterminal in neterminal cu rang egal
+        #       if (Rang != std::string::npos & & Rang == index & &
+        #           m_P[jndex].left[0] == m_VN[index] & &
+        #           m_P[jndex].left[0] == m_P[jndex].right[0]
+        #           )
+        #       {
+        #           std:: string nt;
+        #           nt.push_back(m_P[jndex].right[0]);
+        #           std::vector < int > indices;
+        #           FindAllLeftSideProdIndicesT(nt, indices);
+        #           std::string
+        #           Z;
+        #           Z.push_back(FindNewNonTerminal(m_VN));
+        #           //aici are loc inlocuirea pentru al doilea caz
+        #           Production newP;
+        #           newP.left = Z;
+        #           newP.right = m_P[jndex].right.substr(1, m_P[jndex].right.size() - 1) + Z;
+        #           m_P.push_back(newP);
+        #           Zprod.push_back(newP);
+        #           newP.right = m_P[jndex].right.substr(1, m_P[jndex].right.size() - 1);
+        #           m_P.push_back(newP);
+        #           Zprod.push_back(newP);
+        #           for (auto k: indices)
+        #           {
+        #               newP.left = m_P[jndex].left;
+        #               newP.right = m_P[k].right + Z;
+        #               m_P.push_back(newP);
+        #               Zprod.push_back(newP);
+        #           }
+        #
+        #           m_P.erase(m_P.begin() + jndex);
+        #           jndex--;
+        #       }
+        #   }
+        # }
+        # // Pas 2 si 3
+        # for (int index = 0; index < m_P.size(); index++)
+        # {
+        #   int ok = 0;
+        #   char rightFirstPos = m_P[index].right[0];
+        #   if (m_VN.find(rightFirstPos) != std::string::npos)
+        #       for (int jndex = 0; jndex < m_P.size(); jndex++)
+        #           if (m_P[jndex].left[0] == rightFirstPos)
+        #           {
+        #               ok = 1;
+        #               Production newP;
+        #               newP.left = m_P[index].left;
+        #               newP.right = m_P[jndex].right + m_P[index].right.substr(1, m_P[index].right.size() - 1);
+        #               m_P.push_back(newP);
+        #           }
+        #   if (ok == 1)
+        #   {
+        #       m_P.erase(m_P.begin() + index);
+        #       index--;
+        #   }
+        # }
+        # }
 
-            # Steps for converting CFG into GNF
-            # Step 1 − Convert the grammar into CNF. If the given grammar is not in CNF,
-            # convert it into CNF.
-
-            # Step 2 − If the grammar consists of left recursion, eliminate it. If the context
-            # free grammar contains any left recursion, eliminate it.
-
-            # Step 3 − In the grammar, convert the given production rule into GNF form. If
-            # any production rule in the grammar is not in GNF form, convert it.
-
-            # Step 1
-
-
-            return g
+        # tradu in python

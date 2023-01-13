@@ -1,27 +1,22 @@
-from Grammar import Grammar
-from FiniteAutomaton import FiniteAutomaton
+import GrammarIDC
+import PushDownAutomaton
 
 
-def grammar_to_automaton(g: Grammar):
-    if not g.is_regular():
-        return None
-
-    m = FiniteAutomaton()
-
-    m.Q = g.VN
-    m.Q.add("T")
-    m.q0 = g.S
+def grammar_to_automaton(g: GrammarIDC.Grammar):
+    # g = g.to_fng()
+    m = PushDownAutomaton.FiniteAutomaton()
+    m.Q = set()
+    m.Q.add("q0")
     m.sigma = g.VT
+    m.gama = g.VN
+    m.q0 = "q0"
+    m.Z0 = g.S
+    m.F = set()
+    m.delta = list()
 
-    m.F = ["T"]
-    if "λ" in g.VN or "λ" in g.VT:
-        m.F.append("S")
-
-    for rule in g.P:
-        for symbol in rule[1]:
-            if len(rule[1]) == 1:
-                m.delta.add((rule[0], symbol, "T"))
-            else:
-                m.delta.add((rule[0], rule[1][0], rule[1][1]))
+    p: GrammarIDC.Production
+    for p in g.P:
+        production = PushDownAutomaton.Production(["q0", p.right[0], p.left], ("q0", p.right[1:] if len(p.right) > 1 else [" "]))
+        m.delta.append(production)
 
     return m

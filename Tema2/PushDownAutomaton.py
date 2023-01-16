@@ -66,20 +66,26 @@ class FiniteAutomaton:
         state = self.q0
         stack = [self.Z0]
 
-        for letter in word:
-            for production in self.delta:
-                if production[0] == state and production[1] == letter and production[2] == stack[-1]:
-                    state = production[3]
-                    stack.pop()
-                    stack.extend(production[4])
-                    break
-            else:
+        # psuhdown automaton
+        for symbol in word:
+            # transition is a Production
+            transitions = [transition for transition in self.delta if transition.left[0] == state and transition.left[1] == symbol and transition.left[2] == stack[-1]]
+            if len(transitions) == 0:
                 return False
 
-        if self.F == set():
-            return not stack
-        else:
-            return state in self.F and len(stack) == 1 and stack[0] == self.Z0
+            transition = transitions[0]
+            state = transition.right[0]
+            stack.pop()
+            for symbol in transition.right[1]:
+                stack.append(symbol)
+
+    #     check if F is empty or not
+        if len(self.F) == 0:
+            return True
+
+        return state in self.F
+
+
 
 
     def is_deterministic(self):

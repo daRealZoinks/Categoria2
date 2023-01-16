@@ -3,7 +3,8 @@ import PushDownAutomaton
 
 
 def grammar_to_automaton(g: GrammarIDC.Grammar):
-    # g = g.to_fng()
+    g = g.to_fng()
+
     m = PushDownAutomaton.FiniteAutomaton()
     m.Q = set()
     m.Q.add("q0")
@@ -14,9 +15,13 @@ def grammar_to_automaton(g: GrammarIDC.Grammar):
     m.F = set()
     m.delta = list()
 
-    p: GrammarIDC.Production
-    for p in g.P:
-        production = PushDownAutomaton.Production(["q0", p.right[0], p.left], ("q0", p.right[1:] if len(p.right) > 1 else [" "]))
-        m.delta.append(production)
+    for grammar_production in g.P:
+        # pentru orice regula A -> aγ adaug:
+        # (q0, γ) apartine delta(q0, a, A)
+        # a apartine VT, A apartine VN si γ apartine VN*
+        if(len(grammar_production.right) == 1):
+            m.delta.append(PushDownAutomaton.Production(["q0", grammar_production.right[0], grammar_production.left], ("q0", [" "])))
+        else:
+            m.delta.append(PushDownAutomaton.Production(["q0", grammar_production.right[0], grammar_production.left], ("q0", [grammar_production.right[1:]])))
 
     return m

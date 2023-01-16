@@ -8,5 +8,6 @@ S -> a
 A -> AD
 A -> a
 B -> SC
+C -> CD
 C -> c
 D -> b

@@ -259,32 +259,52 @@ class Grammar:
 		if not len([rule for rule in self.P if rule.left == self.S]) > 0:
 			return None
 
-		# forma normala chomsky
-
 		g = self.simplify()
 
-		new_grammar = Grammar()
-		new_productions = []
-		for production in self.P:
-			left = production.left
-			right = production.right
-			if len(right) == 1 and right[0] in self.VT:
-				new_productions.append(production)
-			else:
-				for i in range(len(right)):
-					if right[i] in self.VT:
-						new_production = Production()
-						new_production.left = left
-						new_production.right = [right[i]]
-						new_productions.append(new_production)
-					else:
-						new_production = Production()
-						new_production.left = left
-						new_production.right = [right[i], left + "'"]
-						new_productions.append(new_production)
-						left = left + "'"
-		new_grammar.P = new_productions
-		new_grammar.VN = self.VN
-		new_grammar.VT = self.VT
-		new_grammar.S = self.S
-		return new_grammar
+		# transformam in forma normala chomsky
+		contor = 1
+		for rule in g.P:
+			if len(rule.right) >= 2:
+				if rule.right[-1] in g.VT:
+					new_rule = Production()
+					new_rule.left = rule.left
+					new_rule.right = rule.right[:-1] + [str("A" + str(contor))]
+
+					new_rule2 = Production()
+					new_rule2.left = "A" + str(contor)
+					new_rule2.right = [rule.right[-1]]
+					g.P.append(new_rule2)
+
+					g.VN.add("A" + str(contor))
+					contor += 1
+					g.P.remove(rule)
+					g.P.append(new_rule)
+
+		contor = 1
+		for rule in g.P:
+			if len(rule.right) > 2:
+				if rule.right[-1] in g.VN and rule.right[-2] in g.VN:
+					new_rule = Production()
+					new_rule.left = rule.left
+					new_rule.right = rule.right[:-2]+[str("D" + str(contor))]
+
+					new_rule2 = Production()
+					new_rule2.left = "D" + str(contor)
+					new_rule2.right = [rule.right[-2], rule.right[-1]]
+					g.P.append(new_rule2)
+
+					contor += 1
+					g.P.remove(rule)
+					g.P.append(new_rule)
+
+		for rule in g.P:
+			if len(rule.right) == 1 and rule.right[0] in g.VT:
+				new_rule = Production()
+				new_rule.left = rule.left
+				new_rule.right = [rule.right[0], "eps"]
+				g.P.append(new_rule)
+				g.P.remove(rule)
+
+		print(g)
+
+		return g

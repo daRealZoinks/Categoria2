@@ -1,11 +1,12 @@
-S T L
-a b + * [ ]
+S A B C D
+a b c
 S
 
-S -> T+S
-S -> T
-T -> L*T
-T -> L
-L -> [S]
-L -> a
-L -> b
+S -> AB
+S -> AD
+S -> a
+A -> AD
+A -> a
+B -> SC
+C -> c
+D -> b

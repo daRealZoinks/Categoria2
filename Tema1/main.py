@@ -3,7 +3,7 @@ from regex_to_finite_automaton import regex_to_finite_automaton as r2fa
 
 
 def main():
-    file = open("DepresieRegulata.txt", 'r')
+    file = open("ExpresieRegulata.txt", 'r')
     r = file.readline()
 
     try:

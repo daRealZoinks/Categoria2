@@ -297,14 +297,19 @@ class Grammar:
 		for rule in g.P:
 			# dilema 1
 			if rule.right[0] in g.VT and rule.right[-1] in g.VT and len(rule.right) > 2:
-				a_reguli = list()
-				for rule2 in g.P:
-					if rule2.left == rule.left and rule2 != rule:
-						a_reguli.append(rule2)
-				if len(a_reguli) > 0:
-					for rule2 in a_reguli:
-						print(rule2.left + "-regulile " + str(rule2))
-					contor += 1
+				for letter in rule.right[1:-1]:
+					if letter in g.VN and letter != rule.right[0]:
+						for rule2 in g.P:
+							if rule2.left == letter:
+								new_rule = Production()
+								new_rule.left = rule.left
+								new_rule.right = rule.right[:1] + rule2.right + rule.right[-1:]
+								g.P.append(new_rule)
+								break
+
+							contor += 1
+							g.P.remove(rule)
+						break
 
 			# dilema 2
 			if rule.left == rule.right[0]:
@@ -328,11 +333,10 @@ class Grammar:
 					new_rule.left = "Z" + str(contor)
 					new_rule.right = [rule.left] + [str("Z" + str(contor))]
 					g.P.append(new_rule)
-
 					contor += 1
 
-		# print(g) # TODO: remove this
+		print(g) # TODO: remove this
 
-		# exit() # TODO: remove this
+		exit() # TODO: remove this
 
 		return g

@@ -211,7 +211,7 @@ class Grammar:
 	def to_fng(self):
 		g = self.simplify()
 
-		# pasul 3: elimina redenumirile
+		# pasul 1: elimina redenumirile
 
 		def has_derivation(A):
 			for rule in g.P:
@@ -254,7 +254,7 @@ class Grammar:
 				break
 			P.append(Pi)
 
-		# transformam in forma normala chomsky
+		# pasul 2: transformam in forma normala chomsky
 		contor = 1
 		for rule in g.P:
 			if len(rule.right) >= 2:
@@ -292,24 +292,19 @@ class Grammar:
 
 		contor = 1
 
+		# transformarea in forma normala greibach
+
 		for rule in g.P:
 			# dilema 1
-			if rule.right[0] in g.VT and rule.right[-1] in g.VT:
-				new_rule = Production()
-				new_rule.left = rule.left
-				new_rule.right = [str("B" + str(contor)), rule.right[-1]]
-
-				new_rule2 = Production()
-				new_rule2.left = "B" + str(contor)
-				new_rule2.right = [rule.right[0]]
-				g.P.append(new_rule2)
-
-				contor += 1
-				g.P.remove(rule)
-				g.P.append(new_rule)
-
-
-
+			if rule.right[0] in g.VT and rule.right[-1] in g.VT and len(rule.right) > 2:
+				a_reguli = list()
+				for rule2 in g.P:
+					if rule2.left == rule.left and rule2 != rule:
+						a_reguli.append(rule2)
+				if len(a_reguli) > 0:
+					for rule2 in a_reguli:
+						print(rule2.left + "-regulile " + str(rule2))
+					contor += 1
 
 			# dilema 2
 			if rule.left == rule.right[0]:
@@ -319,7 +314,6 @@ class Grammar:
 						a_reguli.append(rule2)
 				if len(a_reguli) > 0:
 					for rule2 in a_reguli:
-						print(rule2.left + "-regulile " + str(rule2))
 						new_rule = Production()
 						new_rule.left = rule2.left
 						new_rule.right = rule2.right + [str("Z"+str(contor))]
@@ -336,8 +330,9 @@ class Grammar:
 					g.P.append(new_rule)
 
 					contor += 1
-		print(g)
 
-		exit()
+		# print(g) # TODO: remove this
+
+		# exit() # TODO: remove this
 
 		return g

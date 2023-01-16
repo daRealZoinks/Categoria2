@@ -1,5 +1,6 @@
 import random
 
+
 class Production:
 	def __init__(self):
 		self.left = str
@@ -19,10 +20,11 @@ class Production:
 			return self.right < other.right
 		return self.left < other.left
 
+
 class Grammar:
 	def __init__(self):
-		self.VN = set()
-		self.VT = set()
+		self.VN = list()
+		self.VT = list()
 		self.S = str()
 		self.P = list()
 
@@ -39,8 +41,9 @@ class Grammar:
 
 	def verify_grammar(self):
 		# elementele din VN nu apartin lui VT
-		if self.VN.intersection(self.VT) != set():
-			return False
+		for symbol in self.VN:
+			if symbol in self.VT:
+				return False
 
 		# S nu se afla in VN
 		if self.S not in self.VN:
@@ -58,7 +61,7 @@ class Grammar:
 		# toate productiile au cel putin un element din VN si VT
 		for rule in self.P:
 			for symbol in rule.right:
-				if symbol not in self.VN.union(self.VT):
+				if symbol not in self.VN and symbol not in self.VT:
 					return False
 
 		return True
@@ -93,8 +96,8 @@ class Grammar:
 	def read_grammar(self, file_name):
 		file = open(file_name, "r")
 
-		self.VN = set(file.readline().split())
-		self.VT = set(file.readline().split())
+		self.VN = file.readline().split()
+		self.VT = file.readline().split()
 		self.S = file.readline().strip()
 		file.readline()
 
@@ -128,11 +131,10 @@ class Grammar:
 			return None
 
 		g = Grammar()
-		g.VN = set()
+		g.VN = list()
 		g.VT = self.VT.copy()
 		g.S = self.S
 		g.P = self.P.copy()
-
 
 		# pasul 1: elimina simbolurile neutilizabile
 
@@ -156,8 +158,8 @@ class Grammar:
 			Vi = V[i - 1].union(valid_symbols)
 			V.append(Vi)
 
-			if V[i] == V[i-1]:
-				g.VN = Vi
+			if V[i] == V[i - 1]:
+				g.VN = list(Vi)
 				break
 
 		newP = []
@@ -165,13 +167,12 @@ class Grammar:
 			if rule.left in g.VN:
 				valid = True
 				for letter in rule.right:
-					if letter not in g.VN.union(g.VT):
+					if letter not in g.VN and letter not in g.VT:
 						valid = False
 				if valid:
 					newP.append(rule)
 
 		g.P = newP
-
 
 		# pasul 2: elimina simbolurile inaccesibile
 
@@ -183,7 +184,7 @@ class Grammar:
 		V.append(V0)
 
 		while True:
-			i = i+1
+			i = i + 1
 
 			valid_symbols = set()
 			for rule in g.P:
@@ -192,11 +193,11 @@ class Grammar:
 						if A in rule.right:
 							valid_symbols.add(A)
 
-			Vi = V[i-1].union(valid_symbols)
+			Vi = V[i - 1].union(valid_symbols)
 			V.append(Vi)
 
-			if V[i] == V[i-1]:
-				g.VN = Vi
+			if V[i] == V[i - 1]:
+				g.VN = list(Vi)
 				break
 
 		newP = []
@@ -268,7 +269,7 @@ class Grammar:
 					new_rule2.right = [rule.right[-1]]
 					g.P.append(new_rule2)
 
-					g.VN.add("A" + str(contor))
+					g.VN.append("A" + str(contor))
 					contor += 1
 					g.P.remove(rule)
 					g.P.append(new_rule)
@@ -322,11 +323,11 @@ class Grammar:
 						for rule2 in a_reguli:
 							new_rule = Production()
 							new_rule.left = rule2.left
-							new_rule.right = rule2.right + [str("Z"+str(contor))]
+							new_rule.right = rule2.right + [str("Z" + str(contor))]
 							g.P.append(new_rule)
-							g.VN.add("Z"+str(contor))
+							g.VN.append("Z" + str(contor))
 						new_rule = Production()
-						new_rule.left = "Z"+str(contor)
+						new_rule.left = "Z" + str(contor)
 						new_rule.right = [rule.left]
 						g.P.append(new_rule)
 
@@ -337,15 +338,6 @@ class Grammar:
 						contor += 1
 
 			te_poti_opri = True
-
-			for rule in g.P:
-				if rule.right[0] not in g.VN:
-					if rule.right[0] == "S":
-						te_poti_opri = False
-					if rule.right[0] not in g.VT:
-						if rule.left[0] != "Z":
-							if all([letter in g.VN for letter in rule.right]):
-								te_poti_opri = False
 
 			if te_poti_opri:
 				break

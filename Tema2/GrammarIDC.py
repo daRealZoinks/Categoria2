@@ -294,22 +294,23 @@ class Grammar:
 
 		# transformarea in forma normala greibach
 
-		for rule in g.P:
-			# dilema 1
-			if rule.right[0] in g.VT and rule.right[-1] in g.VT and len(rule.right) > 2:
-				for letter in rule.right[1:-1]:
-					if letter in g.VN and letter != rule.right[0]:
-						for rule2 in g.P:
-							if rule2.left == letter:
-								new_rule = Production()
-								new_rule.left = rule.left
-								new_rule.right = rule.right[:1] + rule2.right + rule.right[-1:]
-								g.P.append(new_rule)
-								break
+		while True:
+			for rule in g.P:
+				# dilema 1
+				if rule.right[0] in g.VT and rule.right[-1] in g.VT and len(rule.right) > 2:
+					for letter in rule.right[1:-1]:
+						if letter in g.VN and letter != rule.right[0]:
+							for rule2 in g.P:
+								if rule2.left == letter:
+									new_rule = Production()
+									new_rule.left = rule.left
+									new_rule.right = rule.right[:1] + rule2.right + rule.right[-1:]
+									g.P.append(new_rule)
+									break
 
-							contor += 1
-							g.P.remove(rule)
-						break
+								contor += 1
+								g.P.remove(rule)
+							break
 
 				# dilema 2
 				if rule.left == rule.right[0]:
@@ -329,14 +330,24 @@ class Grammar:
 						new_rule.right = [rule.left]
 						g.P.append(new_rule)
 
-					new_rule = Production()
-					new_rule.left = "Z" + str(contor)
-					new_rule.right = [rule.left] + [str("Z" + str(contor))]
-					g.P.append(new_rule)
-					contor += 1
+						new_rule = Production()
+						new_rule.left = "Z" + str(contor)
+						new_rule.right = [rule.left] + [str("Z" + str(contor))]
+						g.P.append(new_rule)
+						contor += 1
 
-		#print(g) # TODO: remove this
+			te_poti_opri = True
 
-		#exit() # TODO: remove this
+			for rule in g.P:
+				if rule.right[0] not in g.VN:
+					if rule.right[0] == "S":
+						te_poti_opri = False
+					if rule.right[0] not in g.VT:
+						if rule.left[0] != "Z":
+							if all([letter in g.VN for letter in rule.right]):
+								te_poti_opri = False
+
+			if te_poti_opri:
+				break
 
 		return g

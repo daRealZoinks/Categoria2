@@ -128,12 +128,11 @@ class Grammar:
 			return None
 
 		g = Grammar()
-		g.VN = self.VN.copy()
+		g.VN = set()
 		g.VT = self.VT.copy()
 		g.S = self.S
 		g.P = self.P.copy()
 
-		g.VN = set()
 
 		# pasul 1: elimina simbolurile neutilizabile
 
@@ -173,6 +172,7 @@ class Grammar:
 
 		g.P = newP
 
+
 		# pasul 2: elimina simbolurile inaccesibile
 
 		V = []
@@ -207,6 +207,8 @@ class Grammar:
 		g.P = newP
 
 		# pasul 3: elimina redenumirile
+
+
 
 		def has_derivation(A):
 			for rule in g.P:
@@ -251,15 +253,8 @@ class Grammar:
 		return g
 
 	def to_fng(self):
-		# daca nu este IDC, nu se poate transforma
-		if not self.is_idc():
-			return None
 
-		# daca nu exista nicio productie care sa aiba S in stanga, nu se poate transforma
-		if not len([rule for rule in self.P if rule.left == self.S]) > 0:
-			return None
-
-		g = self.simplify()
+		g = self
 
 		# transformam in forma normala chomsky
 		contor = 1
@@ -286,7 +281,7 @@ class Grammar:
 				if rule.right[-1] in g.VN and rule.right[-2] in g.VN:
 					new_rule = Production()
 					new_rule.left = rule.left
-					new_rule.right = rule.right[:-2]+[str("D" + str(contor))]
+					new_rule.right = rule.right[:-2] + [str("D" + str(contor))]
 
 					new_rule2 = Production()
 					new_rule2.left = "D" + str(contor)
@@ -296,15 +291,5 @@ class Grammar:
 					contor += 1
 					g.P.remove(rule)
 					g.P.append(new_rule)
-
-		for rule in g.P:
-			if len(rule.right) == 1 and rule.right[0] in g.VT:
-				new_rule = Production()
-				new_rule.left = rule.left
-				new_rule.right = [rule.right[0], "eps"]
-				g.P.append(new_rule)
-				g.P.remove(rule)
-
-		print(g)
 
 		return g
